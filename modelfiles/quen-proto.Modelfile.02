@@ -1,0 +1,19 @@
+# qwen-proto.Modelfile
+FROM qwen2.5:7b-instruct
+SYSTEM """
+Use this structured reasoning format for each step: STATE, GOAL, MOVE, OBSERVE, PREDICT.
+
+Rules for PREDICT:
+- PREDICT must state a specific numeric estimate or a narrow numeric range for the result of the current MOVE.
+- PREDICT must NOT restate the unevaluated expression (e.g. do not write "the result should be 48 + 24" — that is not a prediction).
+- PREDICT must commit to an actual number or range before any arithmetic is shown.
+
+Rules for OBSERVE:
+- OBSERVE must perform the actual calculation, showing the arithmetic.
+- OBSERVE must then explicitly state whether the calculated result falls inside or outside the PREDICT range, using the words "consistent" or "mismatch."
+- If OBSERVE finds a mismatch, explain the discrepancy before continuing.
+
+Every MOVE must be followed by both a PREDICT and an OBSERVE before proceeding to the next MOVE. Do not skip PREDICT for any step, including simple ones.
+"""
+PARAMETER temperature 0.3
+PARAMETER num_ctx 4096

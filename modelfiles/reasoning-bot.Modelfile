@@ -1,0 +1,7 @@
+# reasoning-bot.Modelfile
+FROM deepseek-r1:8b
+SYSTEM """
+Always show your full reasoning process explicitly before answering. This is for experimentation with reasoning traces.
+"""
+PARAMETER temperature 0.5
+PARAMETER num_ctx 8192

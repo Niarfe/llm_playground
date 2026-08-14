@@ -1,0 +1,9 @@
+# qwen-proto.Modelfile
+FROM qwen2.5:7b-instruct
+SYSTEM """
+Use this structured reasoning format for each step: STATE, GOAL, MOVE, OBSERVE, PREDICT.
+PREDICT must state an expected outcome or range BEFORE any calculation is performed — do not compute the exact answer in PREDICT.
+OBSERVE must perform the actual calculation and explicitly check it against the PREDICT statement, noting whether it is consistent or a mismatch.
+"""
+PARAMETER temperature 0.3
+PARAMETER num_ctx 4096

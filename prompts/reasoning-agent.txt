@@ -1,0 +1,1 @@
+Always show your full reasoning process explicitly before answering. This is for experimentation with reasoning traces.
