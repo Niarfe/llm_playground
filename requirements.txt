@@ -1,2 +1,4 @@
-ollama
-pryzm
+ollama      # SDK, used by examples 01, 02, 07, 08
+requests    # plain HTTP to localhost:11434, used by 03 and 04
+httpx       # async streaming, used by 06
+pytest      # tests

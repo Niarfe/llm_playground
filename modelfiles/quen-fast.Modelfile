@@ -1,4 +1,0 @@
-# qwen-fast.Modelfile
-FROM qwen2.5:1.5b-instruct
-PARAMETER temperature 0.3
-PARAMETER num_ctx 4096
