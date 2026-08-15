@@ -1,5 +1,5 @@
 """
-05 — Remember specifics that compaction threw away.
+05 -- Remember specifics that compaction threw away.
 
 MAIN POINT
     Compaction is lossy and you do not choose what it loses. You mentioned
@@ -11,11 +11,11 @@ MAIN POINT
       READ    each turn, inject the few that overlap with the question
 
     Compaction shrinks what you send. The fact store recovers what
-    compaction discarded. Opposite operations — hence separate files.
+    compaction discarded. Opposite operations -- hence separate files.
 
 PROVING IT ACTUALLY WORKS
     Easy to fool yourself here. Say "my cat is Blue", ask two turns later,
-    get "Blue" — and conclude the fact store worked when the model simply
+    get "Blue" -- and conclude the fact store worked when the model simply
     read it off the still-present conversation.
 
     So this example prints whether the answer is still in the raw history.
@@ -24,7 +24,7 @@ PROVING IT ACTUALLY WORKS
 
 WHY WORD OVERLAP AND NOT EMBEDDINGS
     No embedding model, no vector database, no per-turn cost. It fails in
-    two directions, and the second is the surprise — see tests/. Start here;
+    two directions, and the second is the surprise -- see tests/. Start here;
     reach for embeddings when you can name a query this gets wrong.
 
 PREVIOUSLY
@@ -124,7 +124,7 @@ def call_ollama(messages, temperature=0.0):
 
 
 ##############################################################################
-# THE STORE — plain JSON on disk                                 [new in 05]
+# THE STORE -- plain JSON on disk                                 [new in 05]
 ##############################################################################
 # Deliberately boring. The point is that memory is a file you control, not a
 # feature of the model.
@@ -143,7 +143,7 @@ def save_facts(facts):
 
 
 ##############################################################################
-# WRITE PATH — extraction                                        [new in 05]
+# WRITE PATH -- extraction                                        [new in 05]
 ##############################################################################
 # temperature 0: this is an extraction step, not a creative one (see 03).
 # Models are unreliable about "output ONLY JSON" -- they add fences, they add
@@ -170,7 +170,7 @@ def extract_facts(messages):
 
 
 ##############################################################################
-# READ PATH — retrieval                                          [new in 05]
+# READ PATH -- retrieval                                          [new in 05]
 ##############################################################################
 
 def tokenize(text):

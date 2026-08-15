@@ -12,7 +12,7 @@ import pytest
 
 
 ##############################################################################
-# 07 — the validator that gives the retry loop something to reject
+# 07 -- the validator that gives the retry loop something to reject
 ##############################################################################
 
 VALID = {
@@ -92,7 +92,7 @@ def test_rejects_a_bare_array(retry):
 
 
 ##############################################################################
-# 08 — the tools, and their boundaries
+# 08 -- the tools, and their boundaries
 ##############################################################################
 
 def test_list_files_names_every_script(agent):

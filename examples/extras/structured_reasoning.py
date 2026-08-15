@@ -1,10 +1,10 @@
 """
-EXTRA — Change how a model reasons by changing the shape of its output.
+EXTRA -- Change how a model reasons by changing the shape of its output.
 
 TAG: quality
     Not on the main line. Chain-of-thought prompting improves answer
     quality; it is not what makes the agent loop function. Remove it and
-    08 still works — that is the test for what belongs on the path.
+    08 still works -- that is the test for what belongs on the path.
 
 MAIN POINT
     Ask a small model a word problem and it often produces a confident,

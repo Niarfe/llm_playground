@@ -7,7 +7,7 @@ Small, self-contained examples for building a local agentic AI setup with
 understand every line of it.**
 
 This is a **teaching repo**, not a library. There is no shared package to
-import, and the examples deliberately repeat code — a twenty-line block copied
+import, and the examples deliberately repeat code -- a twenty-line block copied
 across four files is a fair price for reading any single file top to bottom
 without chasing an import. Copy what is useful into your own code.
 
@@ -32,7 +32,7 @@ ollama serve
 | Model | Size | Why |
 |---|---|---|
 | `llama3.1` | 4.9 GB | The workhorse. Supports tool calling |
-| `qwen2.5:1.5b-instruct` | 1.0 GB | Small and fast. Makes a correct single tool call 4/5 — then falls apart on the multi-step loop in 08. That gap is the lesson |
+| `qwen2.5:1.5b-instruct` | 1.0 GB | Small and fast. Makes a correct single tool call 4/5 -- then falls apart on the multi-step loop in 08. That gap is the lesson |
 
 `make models-optional` adds `qwen2.5:7b-instruct` and `deepseek-r1:8b` if you
 want to compare families.
@@ -46,10 +46,10 @@ Read them in order. Each starts from a problem the previous one leaves open.
 | 01 | [minimal_chat](examples/01_minimal_chat.py) | The model has no memory. You maintain the message list, always |
 | 02 | [pick_model_and_prompt](examples/02_pick_model_and_prompt.py) | Vary model and system prompt without editing code |
 | 03 | [temperature](examples/03_temperature.py) | The third control: how it samples. Reporting wants 0, generating does not |
-| 04 | [compaction](examples/04_compaction.py) | The message list grows forever — summarize old turns to bound it |
-| 05 | [fact_memory](examples/05_fact_memory.py) | Compaction is lossy — a searchable fact store recovers specifics |
+| 04 | [compaction](examples/04_compaction.py) | The message list grows forever -- summarize old turns to bound it |
+| 05 | [fact_memory](examples/05_fact_memory.py) | Compaction is lossy -- a searchable fact store recovers specifics |
 | 06 | [tool_calling](examples/06_tool_calling.py) | The model requests, *your code* executes. One round trip |
-| 07 | [retry_loop](examples/07_retry_loop.py) | A loop that resamples. Useful — but not an agent |
+| 07 | [retry_loop](examples/07_retry_loop.py) | A loop that resamples. Useful -- but not an agent |
 | 08 | [agent_loop](examples/08_agent_loop.py) | **The centrepiece.** A loop where each result informs the next call |
 
 The 07/08 pair is the point of the repo. They look almost identical in code and
@@ -57,14 +57,14 @@ differ in one thing: whether the context changes between iterations.
 
 ## Extras
 
-Off the main line. Remove any of them and the agent loop still works — that is
+Off the main line. Remove any of them and the agent loop still works -- that is
 the test for what earned a number.
 
 | | | |
 |---|---|---|
 | *fun* | [tts_say](examples/extras/tts_say.py) | Speech via the macOS `say` binary, and the two tricks that make it bearable |
 | *fun* | [streaming_tts](examples/extras/streaming_tts.py) | Speak while generating: sentence buffering and a worker thread |
-| *quality* | [structured_reasoning](examples/extras/structured_reasoning.py) | Output structure changes reasoning quality — and self-checks don't work |
+| *quality* | [structured_reasoning](examples/extras/structured_reasoning.py) | Output structure changes reasoning quality -- and self-checks don't work |
 
 ## Running
 
@@ -75,7 +75,7 @@ make run-01
 Or directly: `env/bin/python examples/08_agent_loop.py`
 
 Every interactive example takes the same commands: `/exit`, `/context`,
-`/clear`. `/context` prints exactly what is about to be sent to the model —
+`/clear`. `/context` prints exactly what is about to be sent to the model --
 in a teaching repo the internal state is the lesson, so it gets printed.
 
 ## Tests
@@ -84,22 +84,22 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-80 tests, no running model required. They cover the pure logic — compaction
+80 tests, no running model required. They cover the pure logic -- compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
-sanitizing — and double as documentation. Several record *limitations* rather
+sanitizing -- and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing
 is load-bearing, and `test_fact_memory.py` records both why keyword retrieval
 misses synonyms and why it produces false hits on short queries.
 
 ## Also here
 
-- **[notes.md](notes.md)** — what was learned, including what did not work.
-- **[archive/pyttsx3/](archive/pyttsx3)** — a dead end, kept on purpose. Six
+- **[notes.md](notes.md)** -- what was learned, including what did not work.
+- **[archive/pyttsx3/](archive/pyttsx3)** -- a dead end, kept on purpose. Six
   attempts at Python-library TTS before abandoning it for the `say` binary.
 
 ## What this repo is not
 
-It is not an application. The obvious next step — one program with `--tts`,
-`--model`, `--compact` flags — is a different project with different goals, and
+It is not an application. The obvious next step -- one program with `--tts`,
+`--model`, `--compact` flags -- is a different project with different goals, and
 folding it in here would cost these files the clarity that is their only reason
 to exist.

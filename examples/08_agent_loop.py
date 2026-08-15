@@ -1,5 +1,5 @@
 """
-08 — The agent loop. This is the centrepiece.
+08 -- The agent loop. This is the centrepiece.
 
 MAIN POINT
     An agent loop is a while-loop in which each tool result becomes part of
@@ -25,7 +25,7 @@ WHY THIS TASK
 
 CONTRAST WITH 07
     07 asked the same question every attempt and hoped for a luckier sample.
-    Here the message list grows with every result — watch the [turn N]
+    Here the message list grows with every result -- watch the [turn N]
     counter and the message count climb together. Progress comes from
     accumulated knowledge, not variance.
 
@@ -58,7 +58,7 @@ WHERE DO THE TOOL ARGUMENTS COME FROM?
 
 WHAT YOU WILL ACTUALLY SEE
     The first turn usually goes badly, and that is the interesting part.
-    llama3.1 typically invents filenames — script1.py, script2.py — that
+    llama3.1 typically invents filenames -- script1.py, script2.py -- that
     were never in the list. The tool refuses each one, the loop notes the
     repeated list_files calls, and by turn 2 the model has recovered and
     counts the real files.
@@ -74,7 +74,7 @@ WHAT YOU WILL ACTUALLY SEE
 TRY IT WITH THE SMALL MODEL
     Change MODEL to "qwen2.5:1.5b-instruct" and run it again.
 
-    In 06 that model made a correct single tool call 4 times out of 5 —
+    In 06 that model made a correct single tool call 4 times out of 5 --
     basically as good as llama3.1. Here it calls list_files once, then
     stops using the tools and starts writing plausible-looking file
     contents from imagination. Two turns, zero files actually counted,
@@ -82,22 +82,22 @@ TRY IT WITH THE SMALL MODEL
 
     That contrast is the most useful thing in this file after the loop
     itself. "Supports tool calling" is a capability flag both models
-    declare. Sustaining a multi-step loop — keeping track of what it has
-    learned, and continuing to use tools rather than inventing answers —
+    declare. Sustaining a multi-step loop -- keeping track of what it has
+    learned, and continuing to use tools rather than inventing answers --
     is a separate and much harder capability that no flag reports.
 
 THE BUDGET IS NOT DECORATION
     MAX_TURNS exists because models genuinely do get stuck: re-calling the
     same tool with the same arguments, or forgetting they already have what
     they need. Without a budget that is an infinite loop against a paid or
-    slow endpoint. Watch for repeated calls in the output — you will see it.
+    slow endpoint. Watch for repeated calls in the output -- you will see it.
 
 PREVIOUSLY
     06 made a single tool call. 07 wrapped repetition around a call without
     accumulating anything.
 
 NEXT
-    Nothing on the main line — this is where the sequence lands. See
+    Nothing on the main line -- this is where the sequence lands. See
     examples/extras/ for optional directions, including giving it a voice.
 
 RUN IT
@@ -148,7 +148,7 @@ SYSTEM_PROMPT = (
 
 def list_files() -> str:
     """
-    List every Python script available. Call this first — you cannot know
+    List every Python script available. Call this first -- you cannot know
     the filenames otherwise.
     """
     names = sorted(p.name for p in SCRIPTS_DIR.glob("*.py"))

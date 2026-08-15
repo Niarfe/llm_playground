@@ -11,8 +11,8 @@ Things learned building the examples, including the parts that did not work.
 throughout; only `extras/streaming_tts.py` drops to `httpx`, because it needs
 async streaming.
 
-An earlier version of this repo mixed them — SDK in some examples, `requests`
-in others — and that was the single messiest thing about it. Pick one and stay
+An earlier version of this repo mixed them -- SDK in some examples, `requests`
+in others -- and that was the single messiest thing about it. Pick one and stay
 there.
 
 **Streaming is newline-delimited JSON.** One object per token, so
@@ -32,8 +32,8 @@ you will find this sitting in it:
 
 That instruction is injected by Ollama, not by you, and your Python function's
 schema is rendered into the prompt right below it (`{{ range $.Tools }}`). The
-model is following an instruction you never wrote. Both halves — the template
-and the parser — ship with the model, which is what "this model supports tools"
+model is following an instruction you never wrote. Both halves -- the template
+and the parser -- ship with the model, which is what "this model supports tools"
 actually means mechanically.
 
 The parser is imperfect and you can watch it be imperfect: 08 prints the raw
@@ -42,13 +42,13 @@ the successfully parsed `tool_calls`.
 
 **"Supports tool calling" is a weaker claim than it sounds.** Both llama3.1 and
 qwen2.5:1.5b-instruct declare the `tools` capability, and on a single call they
-are comparable — 5/5 versus 4/5 correct on 06. But on 08's multi-step loop the
+are comparable -- 5/5 versus 4/5 correct on 06. But on 08's multi-step loop the
 1.5B model makes one call, abandons the tools, and hallucinates file contents in
 prose. One correct call and a sustained loop are different capabilities; the
 capability flag only reports the first. Measure the thing you actually need.
 
 **Keep passing `tools=` on every call in the exchange.** Omit it on the
-follow-up call — the one that reads the tool result — and the model replies as
+follow-up call -- the one that reads the tool result -- and the model replies as
 though the tool never ran. The schema is part of the chat template, so without
 it there is no rule for rendering a `"tool"` role message and the result is
 silently dropped. The tool ran, the output is in `messages`, and the model
@@ -56,14 +56,14 @@ cannot see it. Cost me an hour.
 
 **Tool docstrings are prompt text.** The SDK builds the schema the model sees
 from the signature and docstring. A docstring reading "Execute a local Python
-script" got both llama3.1 and qwen2.5 calling it with `/path/to/hello.py` — a
-placeholder. Adding two constraint sentences ("Bare filename only… do not
+script" got both llama3.1 and qwen2.5 calling it with `/path/to/hello.py` -- a
+placeholder. Adding two constraint sentences ("Bare filename only... do not
 invent a placeholder path") took it to 6/6 correct across both models.
 
 **Tool *output* is prompt text too.** Same lesson, other direction. A
 newline-separated file listing got skimmed: llama3.1 read one entry, invented
 three filenames that were never in it, and answered from partial data. Changing
-the return to "There are exactly 4 scripts: a.py, b.py… You must count every
+the return to "There are exactly 4 scripts: a.py, b.py... You must count every
 one before answering" fixed it. What comes back from a tool is read by a
 language model, so it should be written for one.
 
@@ -74,11 +74,11 @@ thing.** Both are a `while`, a budget, a call, a check. The difference:
 
 > Does the context change between iterations?
 >
-> **Retry** — same input, resampled output. Progress comes from variance.
-> **Agent** — input grows with each result. Progress comes from knowledge.
+> **Retry** -- same input, resampled output. Progress comes from variance.
+> **Agent** -- input grows with each result. Progress comes from knowledge.
 
 A retry loop is rejection sampling: generate, validate, resample. Legitimate
-and widely used — schema-valid output, flaky networks, best-of-N with a scorer.
+and widely used -- schema-valid output, flaky networks, best-of-N with a scorer.
 It works when each attempt is an independent draw with a decent success rate.
 
 It does not *make progress*. Asking an 8B model to solve a sudoku and checking
@@ -88,11 +88,11 @@ is not thinking.
 
 **A retry loop at temperature 0 is an infinite loop.** Every attempt is
 byte-identical, so if the first fails they all fail identically. Retry loops
-*require* variance to function. Agent loops do not — 08 runs at temperature 0
+*require* variance to function. Agent loops do not -- 08 runs at temperature 0
 and still progresses, because the input changes even though the sampling
 doesn't.
 
-**The loop is necessary but not sufficient — you also have to specify the
+**The loop is necessary but not sufficient -- you also have to specify the
 process.** With tools and a loop but no system prompt, llama3.1 called
 `list_files`, counted one file, invented three filenames, and confidently
 answered wrong. A system prompt saying "call count_lines for EVERY filename
@@ -101,7 +101,7 @@ mechanism grants the *ability* to gather information; it does not produce
 thoroughness.
 
 **Error recovery is the loop's real payoff, and it only shows up when things go
-wrong.** Watching 08, the first turn usually goes badly — invented filenames,
+wrong.** Watching 08, the first turn usually goes badly -- invented filenames,
 repeated `list_files` calls. Then it reads "File not found: script1.py" and
 corrects itself. A one-shot call that guessed wrong is wrong permanently; a
 loop gets to see the error. This is also why tool error messages deserve care:
@@ -110,7 +110,7 @@ they are what the model reads to work out that it went wrong.
 **Budgets are not decoration.** Models re-call the same tool with the same
 arguments, or forget they already have the answer. Without a turn limit that is
 an infinite loop against a slow or paid endpoint. Print a turn counter and flag
-repeated calls — you will see it happen.
+repeated calls -- you will see it happen.
 
 ## Context and memory
 
@@ -135,7 +135,7 @@ you can name a real query this gets wrong, not before.
 time only. Running it per turn doubles your model calls for almost no gain.
 
 **Models are bad at "output only JSON".** They add fences, they add "Sure!".
-Parse defensively and return empty on failure — losing a few facts beats
+Parse defensively and return empty on failure -- losing a few facts beats
 crashing the conversation.
 
 ## Text to speech on macOS
@@ -153,13 +153,13 @@ work, all failing in the same family of ways:
 Root cause: `pyttsx3` on macOS wraps a Cocoa API that expects to be driven from
 the main thread and to own the event loop. Any interactive program already has
 plans for its main thread, so the two fight. Going straight to `AppKit`'s
-`NSSpeechSynthesizer` (`archive/pyttsx3/bulletproof.py`) did fix it — but by
+`NSSpeechSynthesizer` (`archive/pyttsx3/bulletproof.py`) did fix it -- but by
 then `subprocess` + `say` was simpler, had no dependency, and could not
 deadlock.
 
 **Two tricks that matter more than the engine choice:**
 
-1. `[[slnc 500]]` — an Apple speech command for 500ms of silence, prepended to
+1. `[[slnc 500]]` -- an Apple speech command for 500ms of silence, prepended to
    every utterance. CoreAudio needs a moment to wake up; without the pad it eats
    the first syllable. This alone fixed most of what looked like an engine
    problem.
@@ -181,7 +181,7 @@ one fixed while varying the other is the fastest way to learn what a model
 actually contributes.
 
 **Structure changes reasoning quality.** Forcing STATE / GOAL / MOVE / PREDICT /
-OBSERVE noticeably helps small models on arithmetic word problems — each step
+OBSERVE noticeably helps small models on arithmetic word problems -- each step
 gets written where the next can use it. Committing to a bound *before*
 calculating ("the result is under 48") gives the model something to contradict
 itself against, which is a self-check it will not otherwise perform.
@@ -197,7 +197,7 @@ Consistent
 
 108 is not less than 56. It wrote "Consistent" because that token follows
 OBSERVE in the pattern, not because it compared anything. It also wrote PREDICTs
-that perform the calculation inside the prediction — the one thing the prompt
+that perform the calculation inside the prediction -- the one thing the prompt
 explicitly forbids.
 
 The final answer was still correct. So the structure appears to help the
@@ -206,8 +206,8 @@ building anything on top of a model grading its own output, and it is the
 strongest argument for scoring these runs externally rather than trusting the
 model's own "Consistent".
 
-extras/structured_reasoning.py shows the technique. Measuring it properly — fixed question sets,
-repeated trials, scored output — is a different activity and needs its own
+extras/structured_reasoning.py shows the technique. Measuring it properly -- fixed question sets,
+repeated trials, scored output -- is a different activity and needs its own
 harness. A single side-by-side is an anecdote.
 
 **Modelfiles vs system prompts.** A Modelfile bakes the prompt and parameters
@@ -217,7 +217,7 @@ runtime win while you are still learning what works.
 
 ## Repo history
 
-This started as one flat sandbox with four threads tangled together — the
+This started as one flat sandbox with four threads tangled together -- the
 runner, compaction, TTS, and the structured-reasoning experiments. Commit
 `f327e54` is that original state if anything here needs checking against it.
 
@@ -229,8 +229,8 @@ Only genuinely generative work wants more.
 
 This is not academic. The final call in `06_tool_calling.py` reports a fact
 already sitting in `messages`; at the default temperature llama3.1 sometimes
-narrated it as speculation — "since you didn't provide the script, I assume it
-prints…" — while reciting the correct contents. Setting temperature 0 made
+narrated it as speculation -- "since you didn't provide the script, I assume it
+prints..." -- while reciting the correct contents. Setting temperature 0 made
 three consecutive runs byte-identical.
 
 A Modelfile `PARAMETER temperature` bakes a default into the model;

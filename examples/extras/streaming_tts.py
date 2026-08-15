@@ -1,5 +1,5 @@
 """
-EXTRA — Speak while the model is still generating.
+EXTRA -- Speak while the model is still generating.
 
 TAG: fun
     Not on the main line. Follows extras/tts_say.py.

@@ -1,9 +1,9 @@
 """
-04 — Stop the conversation from outgrowing the context window.
+04 -- Stop the conversation from outgrowing the context window.
 
 MAIN POINT
     Every turn resends the entire transcript, so cost and latency climb
-    turn over turn until you hit the context limit — at which point the
+    turn over turn until you hit the context limit -- at which point the
     model silently drops the oldest messages, usually the ones holding your
     setup.
 

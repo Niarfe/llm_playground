@@ -1,5 +1,5 @@
 """
-06 — Let the model call a function on your machine.
+06 -- Let the model call a function on your machine.
 
 MAIN POINT
     The model cannot run anything. It emits a *request* to run something,
@@ -17,7 +17,7 @@ MAIN POINT
     One round trip. 08 turns it into a loop, which is where it gets useful.
 
 SECURITY, PLAINLY
-    The tool defines the boundary — not the prompt. This one only runs files
+    The tool defines the boundary -- not the prompt. This one only runs files
     inside examples/scripts/, checked after resolving the path so that
     "../04_compaction.py" is refused rather than launching a chat loop.
 
@@ -32,7 +32,7 @@ WHAT "SUPPORTS TOOL CALLING" ACTUALLY MEANS
         llama3.1               5/5 calls, 5/5 correct arguments
         qwen2.5:1.5b-instruct  4/5 calls, 4/5 correct arguments
 
-    So the 1.5B model — a 1 GB download — does this nearly as well as the
+    So the 1.5B model -- a 1 GB download -- does this nearly as well as the
     8B one. Run it and see.
 
     Do not generalize that to "small models are fine for agents". On the
@@ -136,10 +136,17 @@ def main() -> int:
 
     # Pass tools= AGAIN. It looks redundant -- we are not asking for another
     # call -- but omitting it breaks the answer: the model replies "you didn't
-    # provide the script contents" as though the tool never ran. The schema is
-    # part of the chat template, so without it the template has no rule for
-    # rendering a "tool" message and the result is invisible. Tool definitions
-    # belong on every call in the exchange.
+    # provide the script contents" as though the tool never ran.
+    #
+    # Why, precisely. Run `ollama show --template llama3.1` and look at the
+    # first block: when .Tools is present the SYSTEM header gains the line
+    # "When you receive a tool call response, use the output to format an
+    # answer to the orginal user question" (their typo, not ours). Drop
+    # tools= and that instruction disappears, so the model is handed a tool
+    # result with no idea what to do with it.
+    #
+    # Tool definitions belong on every call in the exchange, not just the one
+    # that triggers a call.
     #
     # temperature 0 because this call REPORTS a fact already in `messages`.
     # At the default, llama3.1 sometimes narrates the tool output as a guess.

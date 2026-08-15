@@ -1,10 +1,10 @@
 """
-07 — A loop that retries. (This is NOT an agent loop.)
+07 -- A loop that retries. (This is NOT an agent loop.)
 
 MAIN POINT
     You have just seen tool calling, and the natural next thought is "put it
     in a loop." Do that without care and you build this: a retry loop. It is
-    a perfectly good pattern — it is just not the one that makes an agent.
+    a perfectly good pattern -- it is just not the one that makes an agent.
 
     A retry loop is REJECTION SAMPLING. Generate, validate, resample on
     failure. It is the standard answer for schema-valid output, for flaky
@@ -21,7 +21,7 @@ THE TEST THAT SEPARATES THE TWO LOOPS
       Retry (here)  same input, resampled output. Progress from variance.
       Agent (08)    input grows with each result. Progress from knowledge.
 
-    The code looks nearly identical — a while, a budget, a call, a check.
+    The code looks nearly identical -- a while, a budget, a call, a check.
     That similarity is exactly why the mistake is easy to make.
 
 WHEN RETRY FAILS
@@ -33,7 +33,7 @@ WHEN RETRY FAILS
 THE TEMPERATURE TRAP
     A retry loop at temperature 0 is an infinite loop. Every attempt is
     byte-identical, so if the first fails, all of them fail the same way.
-    Retry loops REQUIRE variance to function — a direct consequence of 03.
+    Retry loops REQUIRE variance to function -- a direct consequence of 03.
     This file demonstrates that deliberately before doing it properly.
 
 PREVIOUSLY
@@ -150,7 +150,7 @@ def show_temperature_zero_is_pointless():
     throws away its work.
     """
     print("=" * 76)
-    print("TEMPERATURE 0 — no variance, so retrying cannot change anything")
+    print("TEMPERATURE 0 -- no variance, so retrying cannot change anything")
     print("=" * 76)
 
     outputs = [
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     show_temperature_zero_is_pointless()
 
     print("=" * 76)
-    print("TEMPERATURE 1.0 — variance is what gives retrying something to do")
+    print("TEMPERATURE 1.0 -- variance is what gives retrying something to do")
     print("=" * 76)
     result, attempts = retry_loop(temperature=1.0)
 

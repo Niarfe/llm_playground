@@ -1,5 +1,5 @@
 """
-EXTRA — Make the assistant talk, using the macOS `say` binary.
+EXTRA -- Make the assistant talk, using the macOS `say` binary.
 
 TAG: fun
     Not on the main line. An agent works perfectly well without a voice;
@@ -7,7 +7,7 @@ TAG: fun
     and because the `say` trick is genuinely useful once you know it.
 
 WHERE IT FITS
-    This is a TOOL in the 06/08 sense — something an agent can invoke —
+    This is a TOOL in the 06/08 sense -- something an agent can invoke --
     not part of the machinery that makes an agent work.
 
 MAIN POINT

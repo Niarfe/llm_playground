@@ -1,5 +1,5 @@
 """
-02 — Swap models and system prompts without editing code.
+02 -- Swap models and system prompts without editing code.
 
 MAIN POINT
     Most of what feels like "the model's personality" is the system prompt,
@@ -14,7 +14,7 @@ MAIN POINT
 
 A NOTE ON WORDING
     A model is not a string. It is a few gigabytes of weights sitting on
-    your disk. The string is how you ask Ollama to load one — a handle, not
+    your disk. The string is how you ask Ollama to load one -- a handle, not
     the thing itself. Worth being precise about, because "the model is just
     a name" quietly suggests swapping them is cosmetic. It is not.
 
