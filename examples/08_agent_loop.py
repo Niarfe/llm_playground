@@ -93,6 +93,36 @@ WHAT YOU WILL ACTUALLY SEE, AND WHY IT IS NOT A HALLUCINATION
     that batch one call at a time and it reads as though the model saw each
     result before making the next call. It did not.
 
+    IS THIS NORMAL? NO -- IT IS llama3.1 BEING WEAK
+    Emitting several tool calls at once is a real feature, and correct when
+    the calls are INDEPENDENT: "get the weather in these three cities" is
+    three calls that can run in any order. These are not independent.
+    count_lines needs what list_files returns. Batching them is incoherent.
+
+    Swap MODEL to "qwen2.5:7b-instruct" and watch a model do it properly:
+
+        qwen2.5:7b-instruct   1 call on turn 1, every run. Waits.
+        llama3.1              9 calls on turn 1, every run. Speculates.
+
+    Both reach the right answer here -- llama3.1 only because the loop lets
+    it recover. Three models, three behaviours, and running all three
+    teaches more than any explanation:
+
+        qwen2.5:1.5b   abandons the tools on turn 2, invents an answer
+        llama3.1       batches dependent calls, then recovers
+        qwen2.5:7b     one call, waits for the result, proceeds
+
+    DO NOT "FIX" THIS BY TRUNCATING THE BATCH
+    The obvious mitigation is to execute only the first call per turn and
+    discard the speculative rest. Measured, 3 runs each:
+
+        llama3.1, execute all         3/3 correct, 3 turns
+        llama3.1, execute first only  3/3 WRONG,   6 turns
+
+    Throwing away calls the model asked for leaves it confused about what
+    happened. Executing everything it requested -- and letting the failures
+    come back as tool results -- works better than second-guessing it.
+
 THE FAILURE MODE THIS EXAMPLE CANNOT DETECT
     The loop stops when `tool_calls` comes back empty. That is not the same
     as the model being finished. Three different situations arrive looking

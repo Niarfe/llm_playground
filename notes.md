@@ -140,6 +140,39 @@ invention, it is not knowing to stop and wait for a result it depends on. The
 printed output hides this, because the loop executes that batch one call at a
 time and it reads as though each result informed the next call.
 
+**Batching dependent tool calls is a model weakness, not a protocol feature.**
+Emitting several calls in one reply is legitimate when they are independent.
+When call B needs call A's output, batching them is incoherent -- and whether a
+model does it is a straightforward capability signal. On 08's task, 3 runs each,
+identical everything:
+
+| Model | Tool calls on turn 1 |
+|---|---|
+| `qwen2.5:7b-instruct` | 1, every run. Calls list_files, waits |
+| `llama3.1` | 9, every run. Speculates with placeholder filenames |
+
+Both land the right answer, but llama3.1 only because the loop lets it recover
+from its own bad guesses.
+
+**Do not fix that by truncating the batch.** The obvious mitigation -- execute
+only the first call per turn, discard the speculative rest -- makes things
+worse:
+
+| llama3.1 | Result |
+|---|---|
+| execute every call requested | 3/3 correct, 3 turns |
+| execute only the first | 3/3 wrong, 6 turns |
+
+Discarding calls the model asked for leaves it confused about what actually
+happened. Run everything it requested and let the failures come back as tool
+results; that beats second-guessing it.
+
+**Three models, three failure modes, one task.** Worth running all three on 08:
+qwen2.5:1.5b abandons the tools on turn 2 and invents an answer; llama3.1
+batches dependent calls and then recovers; qwen2.5:7b issues one call, waits,
+and proceeds. That progression is a better description of "model capability"
+than any benchmark number.
+
 **Budgets are not decoration.** Models re-call the same tool with the same
 arguments, or forget they already have the answer. Without a turn limit that is
 an infinite loop against a slow or paid endpoint. Print a turn counter and flag

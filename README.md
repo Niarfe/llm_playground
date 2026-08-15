@@ -34,8 +34,11 @@ ollama serve
 | `llama3.1` | 4.9 GB | The workhorse. Supports tool calling |
 | `qwen2.5:1.5b-instruct` | 1.0 GB | Small and fast. Makes a correct single tool call 4/5 -- then falls apart on the multi-step loop in 08. That gap is the lesson |
 
-`make models-optional` adds `qwen2.5:7b-instruct` and `deepseek-r1:8b` if you
-want to compare families.
+`make models-optional` adds `qwen2.5:7b-instruct` and `deepseek-r1:8b`. Worth
+pulling the first one: running 08 against all three models shows three distinct
+behaviours -- qwen2.5:1.5b abandons its tools and invents an answer, llama3.1
+batches dependent calls then recovers, qwen2.5:7b issues one call and waits.
+That progression says more about model capability than any benchmark.
 
 ## The main line
 
