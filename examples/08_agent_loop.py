@@ -56,6 +56,14 @@ WHERE DO THE TOOL ARGUMENTS COME FROM?
     emit that shape reliably. It is a learned output format, not a feature
     wired into the runtime.
 
+    Consequence worth taking seriously: the model chooses the tool NAME and
+    the ARGUMENTS, and both are just predicted tokens. It will name tools
+    that do not exist and pass arguments that do not fit. `tool(**args)`
+    with no guard is a crash waiting to happen -- this file used to have
+    one, and a real run killed it with
+    list_files(file_name='script1.py'). Validate at the dispatch, and hand
+    failures back as tool results so the loop can recover.
+
 WHAT YOU WILL ACTUALLY SEE
     The first turn usually goes badly, and that is the interesting part.
     llama3.1 typically invents filenames -- script1.py, script2.py -- that
@@ -250,8 +258,32 @@ def agent_loop(question: str) -> None:
 
             print(f"[turn {turn:>2}] {signature}{repeat}")
 
+            # The model controls the tool NAME and the ARGUMENTS, and both are
+            # just tokens it predicted. Neither can be trusted.
+            #
+            # An earlier version of this line was `tool(**args)` with no guard,
+            # and it crashed on a real run: the model called
+            # list_files(file_name='script1.py') -- an argument to a function
+            # that takes none. TypeError, traceback, dead loop.
+            #
+            # Returning the error as a tool result instead is strictly better.
+            # The model reads it and corrects itself, exactly as it does with
+            # "File not found". A crash ends the run; a message continues it.
             tool = TOOLS.get(name)
-            result = tool(**args) if tool else f"Unknown tool: {name}"
+
+            if tool is None:
+                result = (
+                    f"Unknown tool: {name}. "
+                    f"The available tools are: {', '.join(TOOLS)}."
+                )
+            else:
+                try:
+                    result = tool(**args)
+                except TypeError as error:
+                    result = (
+                        f"Bad arguments for {name}: {error}. "
+                        f"Check the tool's parameters and call it again."
+                    )
 
             first_line = result.split("\n")[0]
             extra = f" (+{len(result.splitlines()) - 1} more lines)" if "\n" in result else ""

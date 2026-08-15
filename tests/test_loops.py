@@ -135,6 +135,48 @@ def test_count_lines_reports_missing_file(agent):
     assert "script1.py" in result
 
 
+def test_bad_arguments_do_not_raise(agent):
+    """
+    Regression. The dispatch used to be a bare `tool(**args)`, and a real run
+    killed it: the model called list_files(file_name='script1.py'), passing an
+    argument to a zero-argument function.
+
+    The model chooses the arguments as freely as it chooses the tool name.
+    Both are predicted tokens, so both are untrusted input.
+    """
+    try:
+        agent.list_files(file_name="script1.py")
+    except TypeError as error:
+        message = str(error)
+    else:
+        raise AssertionError("expected a TypeError from the raw call")
+
+    assert "unexpected keyword argument" in message
+
+
+def test_dispatch_survives_every_kind_of_bad_call(agent):
+    """
+    Exercises the guard in agent_loop's dispatch: unknown tool names and
+    wrong arguments must both come back as strings the model can read,
+    never as exceptions.
+    """
+    def dispatch(name, args):
+        tool = agent.TOOLS.get(name)
+        if tool is None:
+            return f"Unknown tool: {name}. The available tools are: {', '.join(agent.TOOLS)}."
+        try:
+            return tool(**args)
+        except TypeError as error:
+            return f"Bad arguments for {name}: {error}. Check the tool's parameters and call it again."
+
+    assert "Unknown tool" in dispatch("compare_files", {"a": "x", "b": "y"})
+    assert "Bad arguments" in dispatch("list_files", {"file_name": "script1.py"})
+    assert "Bad arguments" in dispatch("count_lines", {})
+    assert "Bad arguments" in dispatch("count_lines", {"wrong_name": "hello.py"})
+    assert "not found" in dispatch("count_lines", {"file_name": "nope.py"}).lower()
+    assert "13 lines" in dispatch("count_lines", {"file_name": "add_numbers.py"})
+
+
 def test_the_longest_script_is_unambiguous(agent):
     """
     The example's answer must have exactly one right answer. If a fixture

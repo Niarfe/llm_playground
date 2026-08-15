@@ -84,7 +84,7 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-80 tests, no running model required. They cover the pure logic -- compaction
+82 tests, no running model required. They cover the pure logic -- compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
 sanitizing -- and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing
