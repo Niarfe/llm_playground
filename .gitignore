@@ -223,3 +223,6 @@ facts.json
 
 # Material staged for the app repo (repo 2)
 _repo2/
+
+# Review scratch — triage then delete or promote
+REVIEW-NOTES.md

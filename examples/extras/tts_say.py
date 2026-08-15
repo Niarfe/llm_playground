@@ -1,7 +1,16 @@
 """
-05 — Make the assistant talk, using the macOS `say` binary.
+EXTRA — Make the assistant talk, using the macOS `say` binary.
 
-WHAT THIS TEACHES
+TAG: fun
+    Not on the main line. An agent works perfectly well without a voice;
+    nothing in 01-08 depends on this. It is here because it is enjoyable
+    and because the `say` trick is genuinely useful once you know it.
+
+WHERE IT FITS
+    This is a TOOL in the 06/08 sense — something an agent can invoke —
+    not part of the machinery that makes an agent work.
+
+MAIN POINT
     Text to speech on macOS in about thirty lines, with no Python audio
     library at all: shell out to `say`, the binary that ships with the OS.
 
@@ -28,10 +37,10 @@ BLOCKING VS NOT
     print, and two replies can talk over each other.
     subprocess.run waits -- clean sequencing, but your loop stalls until
     the sentence finishes.
-    Neither is right for streaming. Example 06 solves it with a queue.
+    Neither is right for streaming. See extras/streaming_tts.py, which solves it with a queue.
 
 RUN IT
-    python examples/05_tts_say.py
+    python examples/extras/tts_say.py
     say -v '?'        # list installed voices
 """
 

@@ -1,4 +1,3 @@
-ollama      # SDK, used by examples 01, 02, 07, 08
-requests    # plain HTTP to localhost:11434, used by 03 and 04
-httpx       # async streaming, used by 06
+ollama      # the SDK every main-line example uses
+httpx       # async streaming, extras/streaming_tts.py only
 pytest      # tests

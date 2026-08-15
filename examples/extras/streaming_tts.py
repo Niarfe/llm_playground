@@ -1,8 +1,11 @@
 """
-06 — Speak while the model is still generating.
+EXTRA — Speak while the model is still generating.
+
+TAG: fun
+    Not on the main line. Follows extras/tts_say.py.
 
 THE PROBLEM
-    Example 05 speaks a finished reply. But a local model on a laptop
+    extras/tts_say.py speaks a finished reply. But a local model on a laptop
     produces maybe 20 tokens a second, so a long answer means ten seconds
     of silence before a single word is spoken. It feels broken.
 
@@ -27,7 +30,7 @@ THE TUNING KNOB
     This is the whole tradeoff -- there is no setting that wins both.
 
 RUN IT
-    python examples/06_streaming_tts.py
+    python examples/extras/streaming_tts.py
 
     Commands: /voice  /voice-off  /set-voice <name>  quit
 """
@@ -43,7 +46,7 @@ import threading
 import httpx
 
 OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-MODEL = "dolphin3"
+MODEL = "llama3.1"
 
 # Below this many characters, hold the sentence back and let it merge with
 # the next one rather than spawning a `say` process for a few words.

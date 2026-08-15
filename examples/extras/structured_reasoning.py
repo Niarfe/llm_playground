@@ -1,7 +1,12 @@
 """
-08 — Change how a model reasons by changing the shape of its output.
+EXTRA — Change how a model reasons by changing the shape of its output.
 
-WHAT THIS TEACHES
+TAG: quality
+    Not on the main line. Chain-of-thought prompting improves answer
+    quality; it is not what makes the agent loop function. Remove it and
+    08 still works — that is the test for what belongs on the path.
+
+MAIN POINT
     Ask a small model a word problem and it often produces a confident,
     wrong number. Ask it to follow a fixed output structure and accuracy
     frequently improves -- not because it got smarter, but because each
@@ -46,7 +51,7 @@ HOW TO USE THIS EXAMPLE
     and it needs its own harness rather than a print statement.
 
 RUN IT
-    python examples/08_structured_reasoning.py
+    python examples/extras/structured_reasoning.py
 """
 
 import ollama

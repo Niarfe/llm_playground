@@ -1,5 +1,5 @@
 """
-Tests for 03_compaction.py.
+Tests for 04_compaction.py.
 
 No Ollama required: the summarizer is monkeypatched, which is possible
 precisely because maybe_compact() is a pure function of its input.
@@ -7,7 +7,7 @@ precisely because maybe_compact() is a pure function of its input.
 
 
 def make_history(turns: int) -> list[dict]:
-    """Build `turns` user/assistant pairs."""
+    """Build `turns` user/assistant pairs -- so 2 * turns messages."""
     history = []
     for i in range(turns):
         history.append({"role": "user", "content": f"question {i}"})
@@ -18,14 +18,14 @@ def make_history(turns: int) -> list[dict]:
 def test_short_history_is_untouched(compaction, monkeypatch):
     monkeypatch.setattr(compaction, "summarize", lambda _: "SHOULD NOT BE CALLED")
 
-    history = make_history(2)  # 2 user turns, below SUMMARIZE_EVERY
+    history = make_history(1)  # 1 user turn, below the threshold
     assert compaction.maybe_compact(history) == history
 
 
 def test_compaction_fires_at_threshold(compaction, monkeypatch):
     monkeypatch.setattr(compaction, "summarize", lambda _: "- a durable fact")
 
-    history = make_history(compaction.SUMMARIZE_EVERY)
+    history = make_history(compaction.SUMMARIZE_EVERY_N_USER_TURNS)
     result = compaction.maybe_compact(history)
 
     assert len(result) < len(history)
@@ -36,14 +36,14 @@ def test_compaction_fires_at_threshold(compaction, monkeypatch):
 def test_recent_turns_survive_verbatim(compaction, monkeypatch):
     monkeypatch.setattr(compaction, "summarize", lambda _: "summary")
 
-    history = make_history(compaction.SUMMARIZE_EVERY)
-    expected_tail = history[-compaction.KEEP_LAST:]
+    history = make_history(compaction.SUMMARIZE_EVERY_N_USER_TURNS)
+    expected_tail = history[-compaction.KEEP_LAST_N_MESSAGES:]
 
     result = compaction.maybe_compact(history)
 
-    # summary + the last KEEP_LAST messages, unchanged
+    # summary + the last KEEP_LAST_N_MESSAGES messages, unchanged
     assert result[1:] == expected_tail
-    assert len(result) == compaction.KEEP_LAST + 1
+    assert len(result) == compaction.KEEP_LAST_N_MESSAGES + 1
 
 
 def test_only_older_messages_are_summarized(compaction, monkeypatch):
@@ -52,11 +52,29 @@ def test_only_older_messages_are_summarized(compaction, monkeypatch):
         compaction, "summarize", lambda msgs: seen.update(passed=msgs) or "summary"
     )
 
-    history = make_history(compaction.SUMMARIZE_EVERY)
+    history = make_history(compaction.SUMMARIZE_EVERY_N_USER_TURNS)
     compaction.maybe_compact(history)
 
-    assert seen["passed"] == history[: -compaction.KEEP_LAST]
+    assert seen["passed"] == history[: -compaction.KEEP_LAST_N_MESSAGES]
     assert history[-1] not in seen["passed"]
+
+
+def test_the_two_constants_use_different_units(compaction):
+    """
+    Documents a trap the names now defend against.
+
+    SUMMARIZE_EVERY_N_USER_TURNS counts user turns; KEEP_LAST_N_MESSAGES
+    slices messages. One turn is two messages, so "keep the last 4" keeps
+    two exchanges, not four. The names carry their units for this reason --
+    if either is ever renamed to something unitless, this test is the note
+    explaining why that was a bad idea.
+    """
+    history = make_history(compaction.SUMMARIZE_EVERY_N_USER_TURNS)
+    assert len(history) == compaction.SUMMARIZE_EVERY_N_USER_TURNS * 2
+
+    kept = history[-compaction.KEEP_LAST_N_MESSAGES:]
+    exchanges = sum(1 for m in kept if m["role"] == "user")
+    assert exchanges == compaction.KEEP_LAST_N_MESSAGES // 2
 
 
 def test_repeated_compaction_stays_bounded(compaction, monkeypatch):
@@ -71,4 +89,4 @@ def test_repeated_compaction_stays_bounded(compaction, monkeypatch):
         history.append({"role": "assistant", "content": f"a{i}"})
         sizes.append(len(history))
 
-    assert max(sizes) <= compaction.SUMMARIZE_EVERY * 2 + 2
+    assert max(sizes) <= compaction.SUMMARIZE_EVERY_N_USER_TURNS * 2 + 2

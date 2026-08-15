@@ -1,9 +1,13 @@
 """
 Load the numbered example modules by path.
 
-The examples are named `03_compaction.py` and so on, which is good for
+The examples are named `04_compaction.py` and so on, which is good for
 reading order but not a valid Python identifier, so a normal import will
 not work. importlib loads them by file path instead.
+
+01 is deliberately absent: it runs its calls at module level (it is a
+script, not a module), so importing it would talk to Ollama. Everything
+tested here guards its entry point with `if __name__ == "__main__"`.
 """
 
 import importlib.util
@@ -12,11 +16,12 @@ from pathlib import Path
 
 import pytest
 
-EXAMPLES = Path(__file__).resolve().parent.parent / "examples"
+ROOT = Path(__file__).resolve().parent.parent
+EXAMPLES = ROOT / "examples"
 
 
-def load(filename: str):
-    path = EXAMPLES / filename
+def load(relative_path: str):
+    path = EXAMPLES / relative_path
     spec = importlib.util.spec_from_file_location(path.stem, path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[path.stem] = module
@@ -26,24 +31,34 @@ def load(filename: str):
 
 @pytest.fixture(scope="session")
 def compaction():
-    return load("03_compaction.py")
+    return load("04_compaction.py")
 
 
 @pytest.fixture(scope="session")
 def memory():
-    return load("04_fact_memory.py")
-
-
-@pytest.fixture(scope="session")
-def tts():
-    return load("05_tts_say.py")
-
-
-@pytest.fixture(scope="session")
-def streaming():
-    return load("06_streaming_tts.py")
+    return load("05_fact_memory.py")
 
 
 @pytest.fixture(scope="session")
 def tools():
-    return load("07_tool_calling.py")
+    return load("06_tool_calling.py")
+
+
+@pytest.fixture(scope="session")
+def retry():
+    return load("07_retry_loop.py")
+
+
+@pytest.fixture(scope="session")
+def agent():
+    return load("08_agent_loop.py")
+
+
+@pytest.fixture(scope="session")
+def tts():
+    return load("extras/tts_say.py")
+
+
+@pytest.fixture(scope="session")
+def streaming():
+    return load("extras/streaming_tts.py")
