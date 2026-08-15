@@ -32,6 +32,30 @@ CONTRAST WITH 07
     That growth is also why compaction (04) stops being theoretical. A long
     agent run fills a context window fast.
 
+WHERE DO THE TOOL ARGUMENTS COME FROM?
+    The most common question about this file, so: they come from the model,
+    and nothing else produces them.
+
+    The model does not "call" anything. It emits text. When the chat
+    template shows it your tool definitions, a model trained for this emits
+    something shaped like
+
+        {"name": "count_lines", "parameters": {"file_name": "hello.py"}}
+
+    Ollama parses that into `response.message.tool_calls`, the loop below
+    unwraps it into `args`, and `tool(**args)` splats it into your real
+    Python function. The filename is a token the model predicted, the same
+    way it predicts any other word.
+
+    Which is why it can invent `script1.py` out of nothing, and why it
+    sometimes names a tool that does not exist at all. The first turn of
+    every run prints the raw reply so you can see this rather than take it
+    on faith.
+
+    "Some models support tool calling" means some models were fine-tuned to
+    emit that shape reliably. It is a learned output format, not a feature
+    wired into the runtime.
+
 WHAT YOU WILL ACTUALLY SEE
     The first turn usually goes badly, and that is the interesting part.
     llama3.1 typically invents filenames — script1.py, script2.py — that
@@ -173,6 +197,25 @@ def agent_loop(question: str) -> None:
             options={"temperature": 0},  # deciding and reporting, not creating
         )
         messages.append(response.message)
+
+        # On the first turn only, show the unprocessed reply. Everything below
+        # reads from tidy parsed fields, which hides where the values come
+        # from -- and "where does the filename come from?" is THE question
+        # about this example.
+        #
+        # The model did not call anything. It emitted TEXT that looked like
+        # {"name": "count_lines", "parameters": {"file_name": "script1.py"}},
+        # and Ollama parsed that into .tool_calls. The filename is a token the
+        # model predicted, exactly like any other word it writes. That is why
+        # it can invent one -- and why it sometimes names a tool that does not
+        # exist, which is why line ~195 uses TOOLS.get() instead of TOOLS[].
+        if turn == 1:
+            print("[raw] the model's unparsed reply, before we interpret it:")
+            print(f"      content   : {response.message.content!r}")
+            for c in response.message.tool_calls or []:
+                print(f"      tool_call : {c.function.name}"
+                      f" args={dict(c.function.arguments)!r}")
+            print("      ^ those args are model output. Nothing else produced them.\n")
 
         if not response.message.tool_calls:
             print(f"\n[turn {turn}] no tool requested -- the model is answering\n")
