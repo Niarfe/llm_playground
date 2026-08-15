@@ -181,7 +181,8 @@ RUN IT
     python examples/08_agent_loop.py --gated    # or: make run-08-gated
 
     Run both. The default speculates on turn 1 and recovers; --gated makes
-    speculation impossible by hiding count_lines until list_files has run.
+    speculation impossible: count_lines is not sent to the model at all
+    until list_files has run.
     The contrast between the two traces is the most useful thing here.
 """
 
@@ -320,8 +321,18 @@ def agent_loop(question: str) -> None:
     have_listed = False  # only used when GATE_TOOLS is on
 
     for turn in range(1, MAX_TURNS + 1):
-        # Progressive disclosure: advertise only the tools that make sense
-        # right now. A tool the model cannot see is a mistake it cannot make.
+        # Progressive disclosure. Note what this does NOT do: it does not
+        # filter, suppress, or discard anything. It changes what is SENT.
+        #
+        # Gated turn 1 calls chat(..., tools=[list_files]). count_lines is
+        # simply not in that list, so Ollama never renders its schema and the
+        # string "count_lines" appears nowhere in the prompt. The model does
+        # not know it exists.
+        #
+        # That is why this works where a system prompt does not. "Do not call
+        # count_lines yet" still tells the model count_lines exists. This does
+        # not mention it. A tool the model cannot see is a mistake it cannot
+        # make.
         if GATE_TOOLS and not have_listed:
             available = [list_files]
         else:
@@ -432,9 +443,11 @@ if __name__ == "__main__":
     GATE_TOOLS = "--gated" in sys.argv
 
     if GATE_TOOLS:
-        print("[mode] GATED -- count_lines is hidden until list_files has run.")
-        print("       The model cannot speculate, because there is nothing to")
-        print("       speculate with. Expect one call on turn 1.\n")
+        print("[mode] GATED -- turn 1 sends tools=[list_files] only.")
+        print("       count_lines is not passed to the model at all, so it does")
+        print("       not appear in the prompt and the model has no idea it")
+        print("       exists. Nothing is suppressed; the option is absent.\n")
+
     else:
         print("[mode] UNGATED -- both tools offered from the start.")
         print("       Expect turn 1 to batch several calls with invented")
