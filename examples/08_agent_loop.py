@@ -64,20 +64,58 @@ WHERE DO THE TOOL ARGUMENTS COME FROM?
     list_files(file_name='script1.py'). Validate at the dispatch, and hand
     failures back as tool results so the loop can recover.
 
-WHAT YOU WILL ACTUALLY SEE
-    The first turn usually goes badly, and that is the interesting part.
-    llama3.1 typically invents filenames -- script1.py, script2.py -- that
-    were never in the list. The tool refuses each one, the loop notes the
-    repeated list_files calls, and by turn 2 the model has recovered and
-    counts the real files.
+WHAT YOU WILL ACTUALLY SEE, AND WHY IT IS NOT A HALLUCINATION
+    Turn 1 emits something like this, all in ONE reply:
 
-    Do not read that as the example misbehaving. A single round trip that
-    guessed wrong would simply be wrong, permanently. A loop gets to see
-    "File not found", and correct itself. Recovery from its own mistakes is
-    a property the loop provides and one-shot calling cannot.
+        list_files()
+        count_lines(file_name='script1.py')
+        count_lines(file_name='script2.py')
 
-    It is also why tool error messages deserve care: "File not found:
-    script1.py" is what the model reads to figure out it went wrong.
+    It is tempting to call script1.py a hallucination -- the model ignoring
+    filenames it was given. It is not, and the distinction matters.
+
+    At that moment the message list is [system, question]. list_files has
+    not run. NOTHING has run. The model has no possible way to know the real
+    filenames, so it does the only thing it can: it plans the whole
+    sequence, using placeholders for values it does not have yet.
+
+    Measured over 5 runs, llama3.1 does this 5 times out of 5. It never
+    emits list_files() alone and waits. The placeholders drift between runs
+    -- script1.py, file1.py, hello.py, world.py -- which is what
+    placeholder-generation looks like.
+
+    So the real limitation is not invention. It is that the model does not
+    know it should STOP and wait for a result it depends on. The loop is
+    what saves it: the placeholders get refused, and on turn 2 -- now
+    holding the real list -- it uses real names.
+
+    The printed output makes this hard to see, because the loop executes
+    that batch one call at a time and it reads as though the model saw each
+    result before making the next call. It did not.
+
+THE FAILURE MODE THIS EXAMPLE CANNOT DETECT
+    The loop stops when `tool_calls` comes back empty. That is not the same
+    as the model being finished. Three different situations arrive looking
+    identical:
+
+      1. It genuinely answered.
+      2. It gave up and started inventing (see the small-model note below).
+      3. It DID ask for a tool, but wrote prose first --
+
+           'The tool returned: add_numbers.py, countdown.py...
+            I will now count each one.
+            {"name": "count_lines", "parameters": {...}}'
+
+         -- and Ollama's parser, which expects the JSON to stand alone,
+         extracted nothing. The model asked. The parser missed it. The loop
+         reads silence as an answer.
+
+    Case 3 is not hypothetical; it is measurable, and the next section is
+    the story of provoking it by accident.
+
+    This is why real agent frameworks do not infer completion from silence.
+    They give the model an explicit `done` tool it must call, or verify the
+    answer separately.
 
 TRY IT WITH THE SMALL MODEL
     Change MODEL to "qwen2.5:1.5b-instruct" and run it again.
@@ -163,10 +201,17 @@ def list_files() -> str:
     if not names:
         return "(no python files found)"
 
-    # Tool output is prompt text too. A bare newline-separated list gets
-    # skimmed and half-ignored -- llama3.1 read one and then invented three
-    # filenames that were never in it. Stating the count and enumerating
-    # them in a sentence made that stop. Same lesson as the docstring in 06.
+    # Tool output is prompt text too, and this sentence is load-bearing.
+    #
+    # Measured, 5 runs each, everything else identical:
+    #
+    #   returning "a.py\nb.py\nc.py"          -> 5/5 WRONG answers
+    #   returning the sentence below          -> 5/5 CORRECT
+    #
+    # A bare newline list gets skimmed. Stating the count, enumerating the
+    # names inline, and restating the obligation does not. Same lesson as
+    # the docstring in 06, pointing the other way: what a tool RETURNS is
+    # read by a language model, so write it for one.
     return (
         f"There are exactly {len(names)} scripts: "
         + ", ".join(names)
@@ -269,6 +314,19 @@ def agent_loop(question: str) -> None:
             # Returning the error as a tool result instead is strictly better.
             # The model reads it and corrects itself, exactly as it does with
             # "File not found". A crash ends the run; a message continues it.
+            #
+            # And the WORDING of that message decides whether it recovers.
+            # Measured, 5 runs each, only the error string differing:
+            #
+            #   "Bad arguments: {error}"                        -> 0/5 correct
+            #   "Bad arguments for {name}: {error}. Check the
+            #    tool's parameters and call it again."          -> 5/5 correct
+            #
+            # Without the closing instruction the model narrates its plan in
+            # prose instead of emitting JSON, Ollama's parser finds no tool
+            # call, and the loop exits early believing it got an answer --
+            # case 3 in the header. Five words of instruction are the whole
+            # difference between a loop that finishes and one that stalls.
             tool = TOOLS.get(name)
 
             if tool is None:

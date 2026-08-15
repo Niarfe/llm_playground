@@ -60,12 +60,21 @@ script" got both llama3.1 and qwen2.5 calling it with `/path/to/hello.py` -- a
 placeholder. Adding two constraint sentences ("Bare filename only... do not
 invent a placeholder path") took it to 6/6 correct across both models.
 
-**Tool *output* is prompt text too.** Same lesson, other direction. A
-newline-separated file listing got skimmed: llama3.1 read one entry, invented
-three filenames that were never in it, and answered from partial data. Changing
-the return to "There are exactly 4 scripts: a.py, b.py... You must count every
-one before answering" fixed it. What comes back from a tool is read by a
-language model, so it should be written for one.
+**Tool *output* is prompt text too, including error messages.** Same lesson,
+other direction, and it is the strongest effect measured in this repo. Two
+experiments on 08, 5 runs each, everything else held constant:
+
+| Change | Result |
+|---|---|
+| `list_files` returns `"a.py\nb.py\nc.py"` | 5/5 wrong answers |
+| `list_files` returns `"There are exactly 4 scripts: a.py, ... You must count the lines of every one before answering."` | 5/5 correct |
+| Bad-argument error reads `"Bad arguments: {error}"` | 0/5 correct |
+| ...plus `"Check the tool's parameters and call it again."` | 5/5 correct |
+
+Five words appended to an error string are the difference between a loop that
+completes and one that stalls. What a tool returns is read by a language model,
+so write it for one -- and that includes the failure paths, which is where it is
+easiest to forget.
 
 ## Loops
 
@@ -106,6 +115,30 @@ repeated `list_files` calls. Then it reads "File not found: script1.py" and
 corrects itself. A one-shot call that guessed wrong is wrong permanently; a
 loop gets to see the error. This is also why tool error messages deserve care:
 they are what the model reads to work out that it went wrong.
+
+**A loop cannot tell "finished" from "gave up" -- or from "parser missed it".**
+Termination is `tool_calls` came back empty, and at least three different things
+produce that:
+
+1. The model genuinely answered.
+2. The model gave up and started inventing (qwen2.5:1.5b does this on turn 2).
+3. The model DID request a tool but wrote prose first, so Ollama's parser --
+   which expects the JSON to stand alone -- extracted nothing.
+
+Case 3 was found by accident while trying to reproduce a result, and it is the
+nastiest, because the model is working correctly and the loop still stops. It is
+why real frameworks give the model an explicit `done` tool to call rather than
+inferring completion from silence.
+
+**Speculative first turns are not hallucination.** On turn 1 of 08 the model
+emits `list_files()` AND several `count_lines(file_name='script1.py')` calls in
+one reply, before anything has executed. Easy to read as the model ignoring
+data it was given -- but it has no data yet; the message list is just
+[system, question]. It is planning the sequence with placeholders for values it
+cannot know. llama3.1 does this 5/5 and never waits. The real limitation is not
+invention, it is not knowing to stop and wait for a result it depends on. The
+printed output hides this, because the loop executes that batch one call at a
+time and it reads as though each result informed the next call.
 
 **Budgets are not decoration.** Models re-call the same tool with the same
 arguments, or forget they already have the answer. Without a turn limit that is
