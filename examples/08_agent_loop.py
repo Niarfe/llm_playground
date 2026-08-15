@@ -185,7 +185,29 @@ from pathlib import Path
 from ollama import chat
 
 MODEL = "llama3.1"
-MAX_TURNS = 12
+MAX_TURNS = 14
+
+# Flip this to True and run again. It is the most interesting switch here.
+#
+# When gated, count_lines is not advertised to the model until list_files has
+# actually run. On turn 1 there is only one tool in existence, so the model
+# CANNOT emit a speculative count_lines(file_name='script1.py') -- not because
+# it was told not to, but because there is nothing to emit.
+#
+# Measured, 3 runs each:
+#
+#   GATE_TOOLS = False   9 calls on turn 1, 3/3 correct, 3 turns
+#   GATE_TOOLS = True    1 call  on turn 1, 3/3 correct, 7 turns
+#
+# And the approach most people try first, asking politely, does not work:
+# a system prompt saying "call EXACTLY ONE tool per reply, then STOP and wait"
+# got 1 call on turn 1 but 3/3 PARSER_MISS -- the model narrates its plan in
+# prose before the JSON, and Ollama's parser then extracts nothing.
+#
+# The general lesson is worth more than this example: constrain the INTERFACE,
+# do not instruct the model. Removing an option produces obedience; asking for
+# restraint produces prose.
+GATE_TOOLS = False
 
 SCRIPTS_DIR = Path(__file__).resolve().parent / "scripts"
 
@@ -286,12 +308,20 @@ def agent_loop(question: str) -> None:
     print(f"[user] {question}\n")
 
     seen_calls = set()
+    have_listed = False  # only used when GATE_TOOLS is on
 
     for turn in range(1, MAX_TURNS + 1):
+        # Progressive disclosure: advertise only the tools that make sense
+        # right now. A tool the model cannot see is a mistake it cannot make.
+        if GATE_TOOLS and not have_listed:
+            available = [list_files]
+        else:
+            available = list(TOOLS.values())
+
         response = chat(
             model=MODEL,
             messages=messages,
-            tools=list(TOOLS.values()),
+            tools=available,
             options={"temperature": 0},  # deciding and reporting, not creating
         )
         messages.append(response.message)
@@ -332,6 +362,9 @@ def agent_loop(question: str) -> None:
             seen_calls.add(signature)
 
             print(f"[turn {turn:>2}] {signature}{repeat}")
+
+            if name == "list_files":
+                have_listed = True  # unlocks count_lines when GATE_TOOLS is on
 
             # The model controls the tool NAME and the ARGUMENTS, and both are
             # just tokens it predicted. Neither can be trusted.

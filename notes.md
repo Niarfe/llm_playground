@@ -173,6 +173,30 @@ batches dependent calls and then recovers; qwen2.5:7b issues one call, waits,
 and proceeds. That progression is a better description of "model capability"
 than any benchmark number.
 
+**Constrain the interface, do not instruct the model.** llama3.1 opens 08 by
+emitting nine tool calls, most with placeholder filenames it cannot know yet.
+Four approaches to stopping that, 3 runs each:
+
+| Approach | Turn-1 calls | Outcome |
+|---|---|---|
+| Baseline | 9 | 3/3 correct, 3 turns |
+| System prompt: "call EXACTLY ONE tool per reply, then STOP and wait" | 1 | **3/3 parser-miss** |
+| Gate the tools: do not advertise `count_lines` until `list_files` has run | 1 | 3/3 correct, 7 turns |
+| Gated + the one-at-a-time prompt | 1 | 3/3 parser-miss |
+
+Gating works because it removes the option: on turn 1 there is exactly one tool
+in existence, so a speculative `count_lines` is not something the model can
+emit. Asking for the same restraint in words fails every time, and fails in the
+specific way that the model narrates its plan in prose before the JSON, which
+breaks the parser.
+
+Progressive tool disclosure is a standard production technique, and this is why:
+a tool the model cannot see is a mistake it cannot make. The cost is turns --
+7 instead of 3 -- because the model now genuinely iterates instead of guessing
+in bulk.
+
+08 carries a `GATE_TOOLS` flag so both paths can be run and compared.
+
 **Budgets are not decoration.** Models re-call the same tool with the same
 arguments, or forget they already have the answer. Without a turn limit that is
 an infinite loop against a slow or paid endpoint. Print a turn counter and flag
