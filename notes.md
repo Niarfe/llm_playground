@@ -22,9 +22,30 @@ than letting a `JSONDecodeError` kill the stream.
 **Model names are inconsistent in list responses.** Depending on version the
 field is `.model`, `["model"]`, or `["name"]`. Example 02 checks all three.
 
-**Tool calling is not universal.** llama3.1 and qwen2.5:7b support it;
-qwen2.5:1.5b mostly does not. A model without it answers in prose instead of
-returning `tool_calls`, which looks like a bug in your code and is not.
+**Ollama is not a passive pipe.** It renders your `messages` and `tools` into
+a prompt using the *model's own* chat template, runs inference, then parses the
+generated text back into `tool_calls`. Run `ollama show --template llama3.1` and
+you will find this sitting in it:
+
+> Respond in the format {"name": function name, "parameters": dictionary of
+> argument name and its value}. Do not use variables.
+
+That instruction is injected by Ollama, not by you, and your Python function's
+schema is rendered into the prompt right below it (`{{ range $.Tools }}`). The
+model is following an instruction you never wrote. Both halves — the template
+and the parser — ship with the model, which is what "this model supports tools"
+actually means mechanically.
+
+The parser is imperfect and you can watch it be imperfect: 08 prints the raw
+reply, and you will often see JSON fragments leaking into `content` alongside
+the successfully parsed `tool_calls`.
+
+**"Supports tool calling" is a weaker claim than it sounds.** Both llama3.1 and
+qwen2.5:1.5b-instruct declare the `tools` capability, and on a single call they
+are comparable — 5/5 versus 4/5 correct on 06. But on 08's multi-step loop the
+1.5B model makes one call, abandons the tools, and hallucinates file contents in
+prose. One correct call and a sustained loop are different capabilities; the
+capability flag only reports the first. Measure the thing you actually need.
 
 **Keep passing `tools=` on every call in the exchange.** Omit it on the
 follow-up call — the one that reads the tool result — and the model replies as

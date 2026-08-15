@@ -32,7 +32,7 @@ ollama serve
 | Model | Size | Why |
 |---|---|---|
 | `llama3.1` | 4.9 GB | The workhorse. Supports tool calling |
-| `qwen2.5:1.5b-instruct` | 1.0 GB | Small and fast, and mostly *cannot* tool-call — the contrast is the lesson |
+| `qwen2.5:1.5b-instruct` | 1.0 GB | Small and fast. Makes a correct single tool call 4/5 — then falls apart on the multi-step loop in 08. That gap is the lesson |
 
 `make models-optional` adds `qwen2.5:7b-instruct` and `deepseek-r1:8b` if you
 want to compare families.
@@ -84,7 +84,7 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-78 tests, no running model required. They cover the pure logic — compaction
+80 tests, no running model required. They cover the pure logic — compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
 sanitizing — and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing

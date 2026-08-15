@@ -71,6 +71,21 @@ WHAT YOU WILL ACTUALLY SEE
     It is also why tool error messages deserve care: "File not found:
     script1.py" is what the model reads to figure out it went wrong.
 
+TRY IT WITH THE SMALL MODEL
+    Change MODEL to "qwen2.5:1.5b-instruct" and run it again.
+
+    In 06 that model made a correct single tool call 4 times out of 5 —
+    basically as good as llama3.1. Here it calls list_files once, then
+    stops using the tools and starts writing plausible-looking file
+    contents from imagination. Two turns, zero files actually counted,
+    confidently wrong.
+
+    That contrast is the most useful thing in this file after the loop
+    itself. "Supports tool calling" is a capability flag both models
+    declare. Sustaining a multi-step loop — keeping track of what it has
+    learned, and continuing to use tools rather than inventing answers —
+    is a separate and much harder capability that no flag reports.
+
 THE BUDGET IS NOT DECORATION
     MAX_TURNS exists because models genuinely do get stuck: re-calling the
     same tool with the same arguments, or forgetting they already have what

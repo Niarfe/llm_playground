@@ -25,10 +25,24 @@ SECURITY, PLAINLY
     model is not the attacker; anything that can influence the conversation
     is.
 
-MODEL SUPPORT IS NOT UNIVERSAL
-    llama3.1 and qwen2.5:7b support tool calling. qwen2.5:1.5b mostly does
-    not — it answers in prose instead. That is not a bug in your code, and
-    it is a cheap way to see that capability tracks model size. Try it.
+WHAT "SUPPORTS TOOL CALLING" ACTUALLY MEANS
+    `ollama show <model>` lists a `tools` capability, and both llama3.1 and
+    qwen2.5:1.5b-instruct declare it. Measured on this exact example:
+
+        llama3.1               5/5 calls, 5/5 correct arguments
+        qwen2.5:1.5b-instruct  4/5 calls, 4/5 correct arguments
+
+    So the 1.5B model — a 1 GB download — does this nearly as well as the
+    8B one. Run it and see.
+
+    Do not generalize that to "small models are fine for agents". On the
+    multi-step loop in 08, the same 1.5B model calls one tool, abandons the
+    tools entirely, and hallucinates file contents in prose. One correct
+    call and a sustained loop are different capabilities, and the checkbox
+    only measures the first.
+
+    A model that lacks the capability answers in prose instead of returning
+    `tool_calls`. That is not a bug in your code.
 
 PREVIOUSLY
     01-05 shaped what the model receives. This is the first time it acts.
