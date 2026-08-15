@@ -184,9 +184,18 @@ Four approaches to stopping that, 3 runs each:
 | Gate the tools: do not advertise `count_lines` until `list_files` has run | 1 | 3/3 correct, 7 turns |
 | Gated + the one-at-a-time prompt | 1 | 3/3 parser-miss |
 
-Gating works because it removes the option: on turn 1 there is exactly one tool
-in existence, so a speculative `count_lines` is not something the model can
-emit. Asking for the same restraint in words fails every time, and fails in the
+Gating works, but not for the reason it first appears to. The model STILL
+writes speculative `count_lines` calls when gated -- they are visible in the raw
+reply, and it does this even under a system prompt that never names the tool
+(it guesses a plausible name from the question). What changes is that **Ollama
+only builds `tool_calls` for tools you actually passed.** Well-formed JSON
+naming a tool that was not provided stays in `content` as inert text.
+
+So gating does not stop the speculation. It stops the speculation from
+executing. "Unrunnable", not "unthinkable" -- still the right move, but the
+distinction matters when reasoning about what a model will do.
+
+Asking for the same restraint in words fails every time, and fails in the
 specific way that the model narrates its plan in prose before the JSON, which
 breaks the parser.
 

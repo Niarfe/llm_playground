@@ -180,9 +180,9 @@ RUN IT
     python examples/08_agent_loop.py            # or: make run-08
     python examples/08_agent_loop.py --gated    # or: make run-08-gated
 
-    Run both. The default speculates on turn 1 and recovers; --gated makes
-    speculation impossible: count_lines is not sent to the model at all
-    until list_files has run.
+    Run both. The default speculates on turn 1 and executes the garbage;
+    --gated sends only list_files, so the speculation still appears in the
+    model's raw text but Ollama will not build executable calls from it.
     The contrast between the two traces is the most useful thing here.
 """
 
@@ -321,18 +321,23 @@ def agent_loop(question: str) -> None:
     have_listed = False  # only used when GATE_TOOLS is on
 
     for turn in range(1, MAX_TURNS + 1):
-        # Progressive disclosure. Note what this does NOT do: it does not
-        # filter, suppress, or discard anything. It changes what is SENT.
+        # Progressive disclosure: change which tool SCHEMAS get sent.
         #
-        # Gated turn 1 calls chat(..., tools=[list_files]). count_lines is
-        # simply not in that list, so Ollama never renders its schema and the
-        # string "count_lines" appears nowhere in the prompt. The model does
-        # not know it exists.
+        # Be precise about what this does, because it is not what it looks
+        # like. Gated turn 1 calls chat(..., tools=[list_files]). The model
+        # STILL writes speculative count_lines calls -- verified, they are
+        # visible in the [raw] dump, and it does this even with a system
+        # prompt that never mentions count_lines (it guesses a plausible name
+        # from the question).
         #
-        # That is why this works where a system prompt does not. "Do not call
-        # count_lines yet" still tells the model count_lines exists. This does
-        # not mention it. A tool the model cannot see is a mistake it cannot
-        # make.
+        # What changes is downstream: Ollama only builds tool_calls for tools
+        # that were actually passed. Well-formed JSON naming a tool you did
+        # not provide is left in `content` as inert text. The speculation
+        # still happens; it just cannot execute.
+        #
+        # So gating does not make the model smarter or better behaved. It
+        # removes the blast radius. That is still the right move -- but the
+        # honest description is "unrunnable", not "unthinkable".
         if GATE_TOOLS and not have_listed:
             available = [list_files]
         else:
@@ -444,9 +449,10 @@ if __name__ == "__main__":
 
     if GATE_TOOLS:
         print("[mode] GATED -- turn 1 sends tools=[list_files] only.")
-        print("       count_lines is not passed to the model at all, so it does")
-        print("       not appear in the prompt and the model has no idea it")
-        print("       exists. Nothing is suppressed; the option is absent.\n")
+        print("       The model will STILL write speculative count_lines calls")
+        print("       in its reply -- look for them in [raw] below. But Ollama")
+        print("       only parses calls to tools you actually passed, so they")
+        print("       stay inert text and never execute.\n")
 
     else:
         print("[mode] UNGATED -- both tools offered from the start.")
