@@ -47,6 +47,10 @@ run-07:
 run-08:
 	$(PYTHON) examples/08_agent_loop.py
 
+# Same example, with tools gated so the model cannot speculate on turn 1.
+run-08-gated:
+	$(PYTHON) examples/08_agent_loop.py --gated
+
 # ---- extras: optional, off the main line ----
 
 run-tts:
@@ -59,5 +63,5 @@ run-reasoning:
 	$(PYTHON) examples/extras/structured_reasoning.py
 
 .PHONY: default env update models models-optional test \
-	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 \
+	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated \
 	run-tts run-tts-streaming run-reasoning

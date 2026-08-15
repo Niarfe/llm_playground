@@ -53,7 +53,7 @@ Read them in order. Each starts from a problem the previous one leaves open.
 | 05 | [fact_memory](examples/05_fact_memory.py) | Compaction is lossy -- a searchable fact store recovers specifics |
 | 06 | [tool_calling](examples/06_tool_calling.py) | The model requests, *your code* executes. One round trip |
 | 07 | [retry_loop](examples/07_retry_loop.py) | A loop that resamples. Useful -- but not an agent |
-| 08 | [agent_loop](examples/08_agent_loop.py) | **The centrepiece.** A loop where each result informs the next call |
+| 08 | [agent_loop](examples/08_agent_loop.py) | **The centrepiece.** A loop where each result informs the next call. Run it twice -- `make run-08` and `make run-08-gated` |
 
 The 07/08 pair is the point of the repo. They look almost identical in code and
 differ in one thing: whether the context changes between iterations.

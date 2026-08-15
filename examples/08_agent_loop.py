@@ -177,9 +177,15 @@ NEXT
     examples/extras/ for optional directions, including giving it a voice.
 
 RUN IT
-    python examples/08_agent_loop.py
+    python examples/08_agent_loop.py            # or: make run-08
+    python examples/08_agent_loop.py --gated    # or: make run-08-gated
+
+    Run both. The default speculates on turn 1 and recovers; --gated makes
+    speculation impossible by hiding count_lines until list_files has run.
+    The contrast between the two traces is the most useful thing here.
 """
 
+import sys
 from pathlib import Path
 
 from ollama import chat
@@ -187,7 +193,10 @@ from ollama import chat
 MODEL = "llama3.1"
 MAX_TURNS = 14
 
-# Flip this to True and run again. It is the most interesting switch here.
+# Run with --gated to turn this on. It is the most interesting switch here:
+#
+#     python examples/08_agent_loop.py            # speculates, then recovers
+#     python examples/08_agent_loop.py --gated    # cannot speculate at all
 #
 # When gated, count_lines is not advertised to the model until list_files has
 # actually run. On turn 1 there is only one tool in existence, so the model
@@ -420,4 +429,15 @@ def agent_loop(question: str) -> None:
 
 
 if __name__ == "__main__":
+    GATE_TOOLS = "--gated" in sys.argv
+
+    if GATE_TOOLS:
+        print("[mode] GATED -- count_lines is hidden until list_files has run.")
+        print("       The model cannot speculate, because there is nothing to")
+        print("       speculate with. Expect one call on turn 1.\n")
+    else:
+        print("[mode] UNGATED -- both tools offered from the start.")
+        print("       Expect turn 1 to batch several calls with invented")
+        print("       filenames. Re-run with --gated to make that impossible.\n")
+
     agent_loop(QUESTION)
