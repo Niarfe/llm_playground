@@ -367,22 +367,27 @@ def solve(case_number: int) -> dict:
                         f"parameters and call it again."
                     )
 
-            if name == "read_file" and result.startswith(("Refused", "No such")):
-                print(f"          -> {result.splitlines()[0]}")
-            elif name == "read_file":
+            refused = result.startswith(("Refused", "No such", "REFUSED"))
+
+            if name == "read_file" and not refused:
                 fname = args.get("file_name", "?")
                 files_read.append(fname)
                 INVESTIGATION["records_read"][fname] = result
                 print(f"          -> read {len(result.splitlines())} lines")
+            elif refused:
+                # Wrap rather than truncate: the refusal text is what the model
+                # reads to work out what to do next, so the reader should see
+                # all of it too.
+                body = " ".join(result.split())
+                print(f"          -> {body[:76]}")
+                for start in range(76, len(body), 76):
+                    print(f"             {body[start:start + 76]}")
             else:
                 print(f"          -> {result.splitlines()[0][:90]}")
 
             messages.append({"role": "tool", "content": result})
 
-            if name == "accuse" and result.startswith("REFUSED"):
-                print(f"          -> {result[:100]}")
-
-            if name == "accuse" and not result.startswith("REFUSED"):
+            if name == "accuse" and not refused:
                 print(f"\n[verdict] {args.get('person')}")
                 print(f"[because] {args.get('reasoning', '')[:400]}")
                 return {

@@ -51,6 +51,16 @@ run-08:
 run-08-gated:
 	$(PYTHON) examples/08_agent_loop.py --gated
 
+# Experimental: a task whose PATH branches. Three cases, three routes.
+run-09:
+	$(PYTHON) examples/09_branching_agent.py
+
+run-09-case2:
+	$(PYTHON) examples/09_branching_agent.py --case 2
+
+run-09-case3:
+	$(PYTHON) examples/09_branching_agent.py --case 3
+
 # ---- extras: optional, off the main line ----
 
 run-tts:
@@ -63,5 +73,5 @@ run-reasoning:
 	$(PYTHON) examples/extras/structured_reasoning.py
 
 .PHONY: default env update models models-optional test \
-	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated \
+	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 \
 	run-tts run-tts-streaming run-reasoning
