@@ -71,6 +71,13 @@ run-09-all:
 check-09:
 	$(PYTHON) examples/check_verdicts.py
 
+# Same three cases against the stronger model. Needs: make models-optional
+run-09-all-qwen:
+	-$(PYTHON) examples/09_branching_agent.py --case 1 --model qwen2.5:7b-instruct
+	-$(PYTHON) examples/09_branching_agent.py --case 2 --model qwen2.5:7b-instruct
+	-$(PYTHON) examples/09_branching_agent.py --case 3 --model qwen2.5:7b-instruct
+	@$(PYTHON) examples/check_verdicts.py
+
 # ---- extras: optional, off the main line ----
 
 run-tts:
@@ -83,5 +90,5 @@ run-reasoning:
 	$(PYTHON) examples/extras/structured_reasoning.py
 
 .PHONY: default env update models models-optional test \
-	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all check-09 \
+	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all check-09 run-09-all-qwen \
 	run-tts run-tts-streaming run-reasoning

@@ -88,7 +88,8 @@ def main() -> int:
     print("=" * 72)
     print("  09 VERDICTS -- checked against solutions.json, not by the agent")
     print("=" * 72)
-    print(f"  {'CASE':<6}{'VERDICT':<9}{'ACCUSED':<14}{'EXPECTED':<12}{'PATH':<8}TURNS")
+    print(f"  {'CASE':<6}{'VERDICT':<9}{'ACCUSED':<14}{'EXPECTED':<10}"
+          f"{'PATH':<7}{'TURNS':<7}MODEL")
     print("  " + "-" * 68)
 
     ran = [r for r in results if r["status"] != "NOT RUN"]
@@ -100,7 +101,7 @@ def main() -> int:
             continue
         path = "ok" if r["path_ok"] else "WRONG"
         print(f"  {r['case']:<6}{r['status']:<9}{r['accused'][:13]:<14}"
-              f"{r['expected']:<12}{path:<8}{r['turns']}")
+              f"{r['expected']:<10}{path:<7}{str(r['turns']):<7}{r['model']}")
 
     if not ran:
         print("\n  Nothing to judge yet. Run the agent first.\n")
@@ -112,7 +113,10 @@ def main() -> int:
     print("  " + "-" * 68)
     print(f"  verdict correct : {passed}/{len(ran)}")
     print(f"  AND right route : {clean}/{len(ran)}")
-    print(f"  model           : {ran[0]['model']}")
+    models = sorted({r["model"] for r in ran})
+    if len(models) > 1:
+        print(f"  NOTE: mixed models in this table ({', '.join(models)}).")
+        print("        Re-run all three with one model before comparing.")
 
     for r in ran:
         if r["status"] == "PASS" and not r["path_ok"]:

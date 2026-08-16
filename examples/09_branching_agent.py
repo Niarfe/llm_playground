@@ -82,8 +82,16 @@ RUN IT
 STATUS -- EXPERIMENTAL, AND HONESTLY REPORTED
     Not on the main line. First trial results, one run per case:
 
-        qwen2.5:7b-instruct   case 1 CORRECT   case 2 CORRECT   case 3 WRONG
-        llama3.1              case 1 CORRECT   case 2 WRONG     case 3 WRONG
+    Scored by check_verdicts.py, which the agent cannot influence:
+
+        MODEL                 VERDICT   RIGHT ROUTE
+        llama3.1               2/3         1/3
+        qwen2.5:7b-instruct    2/3         1/3
+
+    Both models fail case 3, and both pass case 2 by the wrong route -- they
+    name Verity without ever opening the guest book. Identical scores from a
+    1 GB gap in model size is itself a finding: this task is not limited by
+    model capability, it is limited by something in the task or the prompt.
 
     The idea works and the task is right. The reliability is not there yet.
 
@@ -134,6 +142,8 @@ from pathlib import Path
 
 from ollama import chat
 
+# Default. Override per run with --model, e.g.
+#   python examples/09_branching_agent.py --case 3 --model qwen2.5:7b-instruct
 MODEL = "llama3.1"
 MAX_TURNS = 14
 
@@ -417,6 +427,11 @@ if __name__ == "__main__":
     number = 1
     if "--case" in sys.argv:
         number = int(sys.argv[sys.argv.index("--case") + 1])
+
+    if "--model" in sys.argv:
+        globals()["MODEL"] = sys.argv[sys.argv.index("--model") + 1]
+
+    print(f"[model] {MODEL}\n")
 
     outcome = solve(number)
 
