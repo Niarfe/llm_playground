@@ -226,3 +226,6 @@ _repo2/
 
 # Review scratch — triage then delete or promote
 REVIEW-NOTES.md
+
+# Agent run artifacts (09)
+runs/

@@ -68,9 +68,16 @@ ACCUSING IS AN EXPLICIT ACT
     real agent frameworks do, and the fiction happens to supply the reason.
 
 RUN IT
-    python examples/09_branching_agent.py            # case 1
-    python examples/09_branching_agent.py --case 2
-    python examples/09_branching_agent.py --case 3
+    make run-09-all      # all three cases, then the independent checker
+
+    Or one at a time, then judge:
+      python examples/09_branching_agent.py --case 2
+      python examples/check_verdicts.py
+
+    This script does NOT tell you whether it was right. It writes a verdict
+    to runs/ and stops. examples/check_verdicts.py owns the answer key and
+    is the only thing that scores anything -- because a system that grades
+    its own work will eventually pass itself.
 
 STATUS -- EXPERIMENTAL, AND HONESTLY REPORTED
     Not on the main line. First trial results, one run per case:
@@ -91,7 +98,17 @@ STATUS -- EXPERIMENTAL, AND HONESTLY REPORTED
 
     Note case 2 succeeded via a DIFFERENT second record than intended --
     alibis rather than the guest book -- and still reached Verity. Right
-    answer, unplanned path. Worth knowing before trusting any single run.
+    answer, unplanned path.
+
+    Once scoring moved out to check_verdicts.py, that stopped being a
+    footnote and became a number. llama3.1 over all three cases:
+
+        verdict correct : 2/3
+        AND right route : 1/3
+
+    The gap between those two lines is the whole argument for scoring the
+    path. Case 2 named the right person without ever opening the record
+    that eliminates the other suspect. Self-reporting called it a pass.
 
     WHAT ALREADY WORKS AND IS WORTH KEEPING
     - The branch is real. On the runs that succeed, case 1 and case 2 open
@@ -111,6 +128,7 @@ STATUS -- EXPERIMENTAL, AND HONESTLY REPORTED
     - Several runs per case before believing any number here.
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -120,6 +138,7 @@ MODEL = "llama3.1"
 MAX_TURNS = 14
 
 CASEFILES = Path(__file__).resolve().parent / "casefiles"
+RUNS = Path(__file__).resolve().parent.parent / "runs"
 
 
 ##############################################################################
@@ -136,8 +155,6 @@ CASES = {
             "single shot. The study display cabinet was locked and undamaged. "
             "Name the person responsible."
         ),
-        "culprit": "Ashby",
-        "expected_path": ["household_inventory.txt", "alibis.txt"],
     },
     2: {
         "brief": (
@@ -145,8 +162,6 @@ CASES = {
             "single loose pearl was in her closed hand. Name the person "
             "responsible."
         ),
-        "culprit": "Verity",
-        "expected_path": ["jewellery_register.txt", "guest_book.txt"],
     },
     3: {
         "brief": (
@@ -154,8 +169,6 @@ CASES = {
             "door was found still locked, with no sign of forcing. Name the "
             "person responsible."
         ),
-        "culprit": "Beel",
-        "expected_path": ["staff_records.txt", "maintenance_log.txt"],
     },
 }
 
@@ -405,15 +418,30 @@ if __name__ == "__main__":
     if "--case" in sys.argv:
         number = int(sys.argv[sys.argv.index("--case") + 1])
 
-    case = CASES[number]
     outcome = solve(number)
 
-    correct = case["culprit"].lower() in outcome["accused"].lower()
-    print(f"\n[expected]  {case['culprit']}  via {case['expected_path']}")
-    print(f"[actual]    {outcome['accused'] or '(none)'}  via {outcome['files_read']}")
-    print(f"[{'CORRECT' if correct else 'WRONG'}] in {outcome['turns']} turns")
-    print(
-        "\nRun the other cases. The tools and the loop do not change; the "
-        "records\nit chooses to open do. That is the difference between a "
-        "loop and a for-loop.\n"
+    # Write the verdict and stop. Note what is NOT here: any notion of whether
+    # this is correct. The agent does not hold the answer key -- see
+    # examples/solutions.json and examples/check_verdicts.py.
+    #
+    # That separation is the same lesson as extras/structured_reasoning.py,
+    # where a model asked to check its own arithmetic wrote "Consistent" under
+    # a result that plainly violated its own stated bound. Anything that grades
+    # its own work will eventually pass itself.
+    RUNS.mkdir(exist_ok=True)
+    artifact = RUNS / f"verdict-case-{number}.json"
+    artifact.write_text(
+        json.dumps(
+            {
+                "case": number,
+                "accused": outcome["accused"],
+                "files_read": outcome["files_read"],
+                "turns": outcome["turns"],
+                "model": MODEL,
+            },
+            indent=2,
+        )
     )
+
+    print(f"\n[written] {artifact}")
+    print("[verify]  env/bin/python examples/check_verdicts.py")
