@@ -220,3 +220,12 @@ __marimo__/
 # Local-only persona files (kept on disk, never committed)
 personal/
 facts.json
+
+# Material staged for the app repo (repo 2)
+_repo2/
+
+# Review scratch — triage then delete or promote
+REVIEW-NOTES.md
+
+# Agent run artifacts (09)
+runs/

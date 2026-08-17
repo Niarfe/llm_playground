@@ -1,2 +1,3 @@
-ollama
-pryzm
+ollama      # the SDK every main-line example uses
+httpx       # async streaming, extras/streaming_tts.py only
+pytest      # tests

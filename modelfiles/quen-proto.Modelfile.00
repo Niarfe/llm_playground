@@ -1,7 +1,0 @@
-# qwen-proto.Modelfile
-FROM qwen2.5:7b-instruct
-SYSTEM """
-Respond using the following structured reasoning format for each step: STATE, GOAL, MOVE, OBSERVE, PREDICT. Apply it to word problems and short reasoning tasks.
-"""
-PARAMETER temperature 0.3
-PARAMETER num_ctx 4096

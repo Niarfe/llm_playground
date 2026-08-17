@@ -1,0 +1,18 @@
+{
+  "_comment": "Answer key for 09. Deliberately NOT in the agent script -- the agent produces a verdict and has no idea whether it is right. Only check_verdicts.py reads this.",
+  "1": {
+    "culprit": "Ashby",
+    "expected_path": ["household_inventory.txt", "alibis.txt"],
+    "why": "Three hold cabinet keys; the alibis clear Danvers and Pike."
+  },
+  "2": {
+    "culprit": "Verity",
+    "expected_path": ["jewellery_register.txt", "guest_book.txt"],
+    "why": "Two own pearls; the guest book puts Harrington in London."
+  },
+  "3": {
+    "culprit": "Beel",
+    "expected_path": ["staff_records.txt", "maintenance_log.txt"],
+    "why": "Three held old cellar keys; the lock was changed and one key cut."
+  }
+}
