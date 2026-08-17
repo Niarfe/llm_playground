@@ -15,6 +15,42 @@ That duplication is checked, not assumed: blocks marked `[unchanged from 02]`
 are verified byte-identical by `tests/test_provenance.py`, so the copies cannot
 silently drift.
 
+## Prerequisites
+
+Two things, and you almost certainly have the second already.
+
+**1. Ollama** — the local model runtime. Everything here talks to it.
+
+Download from **[ollama.com/download](https://ollama.com/download)** (macOS,
+Linux, Windows), or on a Mac with Homebrew:
+
+```bash
+brew install ollama
+```
+
+Check it worked:
+
+```bash
+ollama --version
+```
+
+Developed against Ollama 0.32.1. Anything recent should be fine.
+
+**2. Python 3.9 or newer**, with `venv`. Check with `python3 --version`.
+Developed on 3.14; nothing here needs a version that new.
+
+`make` is used for convenience targets and ships with macOS (via Xcode command
+line tools) and every Linux distribution. If you would rather not use it, every
+target is a one-line Python command you can run directly — see [the
+makefile](makefile).
+
+No API keys, no accounts, no network calls once the models are pulled.
+Everything runs on your machine.
+
+> **macOS note:** the two TTS examples under `extras/` shell out to the macOS
+> `say` binary and will not work elsewhere. Nothing on the main line (01–09)
+> depends on them.
+
 ## Setup
 
 ```bash
@@ -54,6 +90,7 @@ Read them in order. Each starts from a problem the previous one leaves open.
 | 06 | [tool_calling](examples/06_tool_calling.py) | The model requests, *your code* executes. One round trip |
 | 07 | [retry_loop](examples/07_retry_loop.py) | A loop that resamples. Useful -- but not an agent |
 | 08 | [agent_loop](examples/08_agent_loop.py) | **The centrepiece.** A loop where each result informs the next call. Run it twice -- `make run-08` and `make run-08-gated` |
+| 09 | [branching_agent](examples/09_branching_agent.py) | *Experimental.* A task where what it reads decides which record it opens next. Scored by an independent checker -- `make run-09-all` |
 
 The 07/08 pair is the point of the repo. They look almost identical in code and
 differ in one thing: whether the context changes between iterations.
@@ -87,7 +124,7 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-82 tests, no running model required. They cover the pure logic -- compaction
+84 tests, no running model required. They cover the pure logic -- compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
 sanitizing -- and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing
