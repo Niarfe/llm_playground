@@ -19,7 +19,7 @@ silently drift.
 
 Two things, and you almost certainly have the second already.
 
-**1. Ollama** — the local model runtime. Everything here talks to it.
+**1. Ollama** -- the local model runtime. Everything here talks to it.
 
 Download from **[ollama.com/download](https://ollama.com/download)** (macOS,
 Linux, Windows), or on a Mac with Homebrew:
@@ -41,14 +41,14 @@ Developed on 3.14; nothing here needs a version that new.
 
 `make` is used for convenience targets and ships with macOS (via Xcode command
 line tools) and every Linux distribution. If you would rather not use it, every
-target is a one-line Python command you can run directly — see [the
+target is a one-line Python command you can run directly -- see [the
 makefile](makefile).
 
 No API keys, no accounts, no network calls once the models are pulled.
 Everything runs on your machine.
 
 > **macOS note:** the two TTS examples under `extras/` shell out to the macOS
-> `say` binary and will not work elsewhere. Nothing on the main line (01–09)
+> `say` binary and will not work elsewhere. Nothing on the main line (01-09)
 > depends on them.
 
 ## Setup
