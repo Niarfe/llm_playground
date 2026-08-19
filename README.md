@@ -90,7 +90,7 @@ Read them in order. Each starts from a problem the previous one leaves open.
 | 06 | [tool_calling](examples/06_tool_calling.py) | The model requests, *your code* executes. One round trip |
 | 07 | [retry_loop](examples/07_retry_loop.py) | A loop that resamples. Useful -- but not an agent |
 | 08 | [agent_loop](examples/08_agent_loop.py) | **The centrepiece.** A loop where each result informs the next call. Run it twice -- `make run-08` and `make run-08-gated` |
-| 09 | [branching_agent](examples/09_branching_agent.py) | *Experimental.* A task where what it reads decides which record it opens next. Scored by an independent checker -- `make run-09-all` |
+| 09 | [debugging_agent](examples/09_debugging_agent.py) | Fix a failing test. The test suite is the verifier, so nothing needs an answer key. Three bugs in three different files -- `make run-09-all` |
 
 The 07/08 pair is the point of the repo. They look almost identical in code and
 differ in one thing: whether the context changes between iterations.

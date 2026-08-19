@@ -51,32 +51,26 @@ run-08:
 run-08-gated:
 	$(PYTHON) examples/08_agent_loop.py --gated
 
-# Experimental: a task whose PATH branches. Three cases, three routes.
+# 09: fix a failing test. The test suite is the verifier.
 run-09:
-	$(PYTHON) examples/09_branching_agent.py
+	$(PYTHON) examples/09_debugging_agent.py --scenario 1
 
 run-09-case2:
-	$(PYTHON) examples/09_branching_agent.py --case 2
+	$(PYTHON) examples/09_debugging_agent.py --scenario 2
 
 run-09-case3:
-	$(PYTHON) examples/09_branching_agent.py --case 3
+	$(PYTHON) examples/09_debugging_agent.py --scenario 3
 
-# All three cases, then the independent checker.
+# All three bugs. Each lives in a different file, so the path differs.
 run-09-all:
-	-$(PYTHON) examples/09_branching_agent.py --case 1
-	-$(PYTHON) examples/09_branching_agent.py --case 2
-	-$(PYTHON) examples/09_branching_agent.py --case 3
-	@$(PYTHON) examples/check_verdicts.py
+	-$(PYTHON) examples/09_debugging_agent.py --scenario 1
+	-$(PYTHON) examples/09_debugging_agent.py --scenario 2
+	-$(PYTHON) examples/09_debugging_agent.py --scenario 3
 
-check-09:
-	$(PYTHON) examples/check_verdicts.py
-
-# Same three cases against the stronger model. Needs: make models-optional
 run-09-all-qwen:
-	-$(PYTHON) examples/09_branching_agent.py --case 1 --model qwen2.5:7b-instruct
-	-$(PYTHON) examples/09_branching_agent.py --case 2 --model qwen2.5:7b-instruct
-	-$(PYTHON) examples/09_branching_agent.py --case 3 --model qwen2.5:7b-instruct
-	@$(PYTHON) examples/check_verdicts.py
+	-$(PYTHON) examples/09_debugging_agent.py --scenario 1 --model qwen2.5:7b-instruct
+	-$(PYTHON) examples/09_debugging_agent.py --scenario 2 --model qwen2.5:7b-instruct
+	-$(PYTHON) examples/09_debugging_agent.py --scenario 3 --model qwen2.5:7b-instruct
 
 # ---- extras: optional, off the main line ----
 
@@ -90,5 +84,5 @@ run-reasoning:
 	$(PYTHON) examples/extras/structured_reasoning.py
 
 .PHONY: default env update models models-optional test \
-	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all check-09 run-09-all-qwen \
+	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all run-09-all-qwen \
 	run-tts run-tts-streaming run-reasoning
