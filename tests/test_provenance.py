@@ -130,7 +130,7 @@ def test_unchanged_blocks_really_are_unchanged(filename, title, tag):
 @pytest.mark.parametrize("filename", sorted(ALL_BLOCKS))
 def test_tags_are_well_formed(filename):
     """Catch typos like [unchanged from 2] or [copied from 02]."""
-    valid = re.compile(r"^(new in \d{2}|unchanged from \d{2}|extended from \d{2})$")
+    valid = re.compile(r"^(new in|unchanged from|extended from) \d{2}[a-z]?$")
     for title, (tag, _) in ALL_BLOCKS[filename].items():
         if tag is None:
             continue

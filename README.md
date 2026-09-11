@@ -91,9 +91,23 @@ Read them in order. Each starts from a problem the previous one leaves open.
 | 07 | [retry_loop](examples/07_retry_loop.py) | A loop that resamples. Useful -- but not an agent |
 | 08 | [agent_loop](examples/08_agent_loop.py) | **The centrepiece.** A loop where each result informs the next call. Run it twice -- `make run-08` and `make run-08-gated` |
 | 09 | [debugging_agent](examples/09_debugging_agent.py) | Fix a failing test. The test suite is the verifier, so nothing needs an answer key. Three bugs in three different files -- `make run-09-all` |
+| 10 | [layered_review](examples/10_layered_review.py) | Lint, then tests, then a reviewer. Cheap certain checks first; spend a model only on what survives -- `make run-10` |
 
 The 07/08 pair is the point of the repo. They look almost identical in code and
 differ in one thing: whether the context changes between iterations.
+
+## Deepenings
+
+A better part in a slot the main line already has. Skip them and the sequence
+still works -- but each settles a debt an earlier example openly incurred.
+
+**Written, not yet verified end to end.** Run them and tell me what you see;
+the headers say exactly which claims are measured and which are not.
+
+| | | |
+|---|---|---|
+| 05a | [rag](examples/05a_rag.py) | Retrieval by meaning instead of shared words. 05 promised this; embeddings deliver it -- and lose badly on exact identifiers |
+| 07a | [structured_output](examples/07a_structured_output.py) | Constrain the output schema and 07's retry loop has nothing left to retry. Shape becomes free; meaning is still yours |
 
 ## Extras
 
@@ -124,7 +138,7 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-83 tests, no running model required. They cover the pure logic -- compaction
+86 tests, no running model required. They cover the pure logic -- compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
 sanitizing -- and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing
@@ -135,9 +149,9 @@ misses synonyms and why it produces false hits on short queries.
 
 Work in progress, and honest about it. The main line (01-09) runs and is
 verified -- every measured claim in these files was produced by running the
-thing, not by reasoning about it. What is not here yet: retrieval with
-embeddings, constrained output, and a written walkthrough tying the examples
-together. Those are next.
+thing, not by reasoning about it. The two deepenings (05a, 07a) are written but
+not yet run end to end, and say so in their own headers. What is missing
+entirely: a written walkthrough tying the examples together.
 
 Measurements are tied to specific models and a specific Ollama version (see
 Prerequisites). Models drift and tags move, so if a number here does not

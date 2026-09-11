@@ -72,6 +72,22 @@ run-09-all-qwen:
 	-$(PYTHON) examples/09_debugging_agent.py --scenario 2 --model qwen2.5:7b-instruct
 	-$(PYTHON) examples/09_debugging_agent.py --scenario 3 --model qwen2.5:7b-instruct
 
+# 10: lint, then tests, then a reviewer. Each tier catches a different bug.
+run-10:
+	$(PYTHON) examples/10_layered_review.py
+
+run-10-coder:
+	$(PYTHON) examples/10_layered_review.py --model qwen2.5-coder:7b
+
+# ---- deepenings: a better part in an existing slot ----
+# Written but NOT yet verified end to end. Run them and report.
+
+run-05a:
+	$(PYTHON) examples/05a_rag.py
+
+run-07a:
+	$(PYTHON) examples/07a_structured_output.py
+
 # ---- extras: optional, off the main line ----
 
 run-tts:
@@ -84,5 +100,5 @@ run-reasoning:
 	$(PYTHON) examples/extras/structured_reasoning.py
 
 .PHONY: default env update models models-optional test \
-	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all run-09-all-qwen \
+	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all run-09-all-qwen run-10 run-10-coder run-05a run-07a \
 	run-tts run-tts-streaming run-reasoning
