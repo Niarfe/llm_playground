@@ -217,8 +217,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Local-only persona files (kept on disk, never committed)
-personal/
 facts.json
 
 # Material staged for the app repo (repo 2)

@@ -124,18 +124,35 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-84 tests, no running model required. They cover the pure logic -- compaction
+83 tests, no running model required. They cover the pure logic -- compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
 sanitizing -- and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing
 is load-bearing, and `test_fact_memory.py` records both why keyword retrieval
 misses synonyms and why it produces false hits on short queries.
 
+## Status
+
+Work in progress, and honest about it. The main line (01-09) runs and is
+verified -- every measured claim in these files was produced by running the
+thing, not by reasoning about it. What is not here yet: retrieval with
+embeddings, constrained output, and a written walkthrough tying the examples
+together. Those are next.
+
+Measurements are tied to specific models and a specific Ollama version (see
+Prerequisites). Models drift and tags move, so if a number here does not
+reproduce for you, that is worth knowing -- please open an issue rather than
+assuming your setup is wrong.
+
 ## Also here
 
 - **[notes.md](notes.md)** -- what was learned, including what did not work.
 - **[archive/pyttsx3/](archive/pyttsx3)** -- a dead end, kept on purpose. Six
   attempts at Python-library TTS before abandoning it for the `say` binary.
+
+## License
+
+MIT -- see [LICENSE](LICENSE). Copy anything that is useful.
 
 ## What this repo is not
 
