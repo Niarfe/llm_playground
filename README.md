@@ -109,6 +109,22 @@ the headers say exactly which claims are measured and which are not.
 | 05a | [rag](examples/05a_rag.py) | Retrieval by meaning instead of shared words. 05 promised this; embeddings deliver it -- and lose badly on exact identifiers |
 | 07a | [structured_output](examples/07a_structured_output.py) | Constrain the output schema and 07's retry loop has nothing left to retry. Shape becomes free; meaning is still yours |
 
+## Data science examples
+
+The main line builds the foundations. These apply them to work that was
+already somebody's job. Named rather than numbered, because each is
+self-contained and the teaching order is not fixed yet --
+see [data_science_examples/README.md](data_science_examples/README.md).
+
+| | | |
+|---|---|---|
+| | [text_2_sql](data_science_examples/text_2_sql/run.py) | A question in English becomes a SQL query, and the verifier is a database rather than an opinion: run both queries, compare the rows. 05a lost on exact identifiers; this is what you use instead -- `make run-text2sql` |
+| | [classification](data_science_examples/classification/run.py) | Keyword baseline, then zero-shot, then few-shot, against labels a person typed. Reports accuracy twice, with and without the tickets whose label is a judgement call -- `make run-classify-detail` |
+
+Both were measured on 2026-11-10 and both `MEASURED` sections say what the run
+showed, including where it contradicted what the file was written to
+demonstrate.
+
 ## Extras
 
 Off the main line. Remove any of them and the agent loop still works -- that is
@@ -138,20 +154,33 @@ in a teaching repo the internal state is the lesson, so it gets printed.
 make test
 ```
 
-86 tests, no running model required. They cover the pure logic -- compaction
+135 tests, no running model required. They cover the pure logic -- compaction
 thresholds, retrieval scoring, schema validation, tool boundaries, markdown
 sanitizing -- and double as documentation. Several record *limitations* rather
 than asserting correctness: `test_loops.py` pins down why tool output phrasing
 is load-bearing, and `test_fact_memory.py` records both why keyword retrieval
 misses synonyms and why it produces false hits on short queries.
 
+`test_data_science_examples.py` covers the Phase 3 examples, and two of its
+tests are unusual enough to point at. One asserts that no test ticket appears
+in the few-shot prompt, because that leak is one line of code away and
+inflates the score without looking like a bug. The other asserts an *upper*
+bound on the keyword baseline's accuracy: if someone tunes those keyword lists
+against the test set the number climbs, and a baseline that has absorbed the
+answer key is worse than no baseline at all.
+
 ## Status
 
 Work in progress, and honest about it. The main line (01-09) runs and is
 verified -- every measured claim in these files was produced by running the
 thing, not by reasoning about it. The two deepenings (05a, 07a) are written but
-not yet run end to end, and say so in their own headers. What is missing
-entirely: a written walkthrough tying the examples together.
+not yet run end to end, and say so in their own headers.
+
+The two data science examples have each been run once, on 2026-11-10, and
+their numbers are in their headers. One run on one machine is not a result,
+and both say so.
+
+What is missing entirely: a written walkthrough tying the examples together.
 
 Measurements are tied to specific models and a specific Ollama version (see
 Prerequisites). Models drift and tags move, so if a number here does not
