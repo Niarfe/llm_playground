@@ -88,6 +88,28 @@ run-05a:
 run-07a:
 	$(PYTHON) examples/07a_structured_output.py
 
+# ---- phase 3: data science examples ----
+# Named, not numbered. Each one is self-contained.
+# See data_science_examples/README.md
+
+run-text2sql:
+	$(PYTHON) data_science_examples/text_2_sql/run.py
+
+run-text2sql-verbose:
+	$(PYTHON) data_science_examples/text_2_sql/run.py --verbose
+
+# Feeds SQL errors back for one retry. On the measured run this changed
+# nothing, because none of the failures errored.
+run-text2sql-repair:
+	$(PYTHON) data_science_examples/text_2_sql/run.py --repair
+
+run-classify:
+	$(PYTHON) data_science_examples/classification/run.py
+
+# Per-class breakdown, every error, and stated confidence vs real accuracy.
+run-classify-detail:
+	$(PYTHON) data_science_examples/classification/run.py --detail
+
 # ---- extras: optional, off the main line ----
 
 run-tts:
@@ -101,4 +123,6 @@ run-reasoning:
 
 .PHONY: default env update models models-optional test \
 	run-01 run-02 run-03 run-04 run-05 run-06 run-07 run-08 run-08-gated run-09 run-09-case2 run-09-case3 run-09-all run-09-all-qwen run-10 run-10-coder run-05a run-07a \
+	run-text2sql run-text2sql-verbose run-text2sql-repair \
+	run-classify run-classify-detail \
 	run-tts run-tts-streaming run-reasoning
